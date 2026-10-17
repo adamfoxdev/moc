@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
+<!-- Where the "get started" buttons lead: the onboarding site in /platform. Change this one value when it is deployed. -->
+<meta name="onboarding-url" content="http://localhost:3001/">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Northbound — From Vibe-Coded Prototype to Production</title>
@@ -74,7 +76,7 @@ footer{padding:48px 0;border-top:1px solid var(--line);color:var(--muted);font-s
         <li><a href="#pricing">Pricing</a></li>
         <li><a href="#engage">Engage</a></li>
       </ul>
-      <a class="btn" href="#contact">Book a call</a>
+      <a class="btn" data-onboard href="#contact">Get started</a>
     </nav>
   </div>
 </header>
@@ -86,7 +88,7 @@ footer{padding:48px 0;border-top:1px solid var(--line);color:var(--muted);font-s
     <h1>Your vibe-coded prototype works. Now make it production-grade.</h1>
     <p class="lead">AI tools got you to a demo in a weekend. We get you from demo to secure, tested, monitored and supported — and we wire AI into the systems you already run.</p>
     <div class="cta">
-      <a class="btn" href="#contact">Book a free assessment call</a>
+      <a class="btn" data-onboard href="#contact">Tell us what you're working on</a>
       <a class="btn ghost" href="#services">See what we do</a>
     </div>
     <div class="stats">
@@ -216,8 +218,11 @@ footer{padding:48px 0;border-top:1px solid var(--line);color:var(--muted);font-s
 <section id="contact">
   <div class="wrap">
     <h2>Have a prototype that needs to grow up?</h2>
-    <p class="sub">Tell us what you built and what tool you built it with. We reply within one business day.</p>
-    <a class="btn" href="mailto:hello@example.com?subject=Migration%20assessment">hello@example.com</a>
+    <p class="sub">Tell us what you built, or what you're hoping to. It takes two minutes, and you get our first read straight away. No pitch and nothing to pay to find out how we can help.</p>
+    <div class="cta" style="margin-top:0">
+      <a class="btn" data-onboard href="mailto:hello@example.com?subject=Tell%20us%20what%20you%27re%20working%20on">Tell us what you're working on</a>
+      <a class="btn ghost" href="mailto:hello@example.com?subject=Question">Or email us: hello@example.com</a>
+    </div>
   </div>
 </section>
 </main>
@@ -225,6 +230,14 @@ footer{padding:48px 0;border-top:1px solid var(--line);color:var(--muted);font-s
 <footer>
   <div class="wrap">© <span id="y"></span> Northbound Consulting. Placeholder name and contact details — replace before launch.</div>
 </footer>
-<script>document.getElementById('y').textContent=new Date().getFullYear()</script>
+<script>
+document.getElementById('y').textContent=new Date().getFullYear();
+// Point every "get started" button at the onboarding site. Without a URL they keep their email/anchor fallback.
+(function(){
+  var m=document.querySelector('meta[name="onboarding-url"]'),u=m&&m.content.trim();
+  if(!u)return;
+  document.querySelectorAll('[data-onboard]').forEach(function(a){a.href=u});
+})();
+</script>
 </body>
 </html>

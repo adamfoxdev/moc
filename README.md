@@ -42,6 +42,8 @@ IT consulting firm that takes vibe-coded PoCs and MVPs to production and keeps t
 
 `index.html` is a self-contained static page (no build step). Open it in a browser or host it on any static host (Azure Static Web Apps, GitHub Pages).
 
+The "Get started" buttons on the site (header, hero, contact) lead to the onboarding platform. The address is the `onboarding-url` meta tag at the top of `index.html`; it is set to `http://localhost:3001/` for local use, so change it to the deployed address before launch. If the tag is emptied, the buttons fall back to email.
+
 ## Documents
 
 | File | Purpose |
