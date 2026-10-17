@@ -93,6 +93,6 @@ Setup: copy `.env.example` to `.env`, then `node --env-file=.env server/index.js
 - **Single admin token**, not named users. Next step: Entra ID sign-in for staff.
 - **Rate limiting is per process.** Use a shared store or gateway limit if you run more than one instance.
 - **Local SQLite file.** Fine for one instance; for production use Azure SQL by replacing `server/db.js`, and encrypt and back up the data. It holds personal data, so see `DPA.md` and your privacy notice.
-- **No privacy notice or terms page yet.** Add one and link it from the consent checkbox before launch (the legal text needs counsel).
+- **Privacy notice is a draft for counsel** (`../PRIVACY_NOTICE.md`) and is not linked from the form yet. It lists product gaps to fix first: automatic deletion, per-person export and delete, and edit-token expiry (Part C).
 - **Node's `node:sqlite` is still marked experimental.** It is wrapped in `server/db.js`, so swapping to `better-sqlite3` or Azure SQL touches one file.
 - Placeholder name "Northbound", no real branding.

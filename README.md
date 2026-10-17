@@ -57,6 +57,7 @@ The "Get started" buttons on the site (header, hero, contact) lead to the onboar
 | `SOW_POC.md` | Statement of work for the 1-week PoC |
 | `DPA.md` | Data processing agreement (when personal data is processed) |
 | `AI_POLICY.md` | Internal AI acceptable-use and tooling policy |
+| `PRIVACY_NOTICE.md` | Draft privacy notice for the website and onboarding platform, with questions for counsel and the product gaps to fix |
 | `CASE_STUDY_TEMPLATE.md` | Case study template, interview guide and publication approval checklist |
 
 The legal documents are drafts for lawyer review. Defined terms, numbers (warranty 30 days, breach notice 72 hours, payment 30 days, rate card, 30-day fee credit) and clause cross-references are meant to agree across them; change them together.
