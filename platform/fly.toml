@@ -3,7 +3,7 @@
 # (--ha=false: one machine only. The SQLite volume belongs to a single machine, and the email
 #  worker must not run twice.)
 
-app = "northbound-onboarding"      # change: app names are global
+app = "moc-yytcxa"
 primary_region = "lhr"             # change: where the data lives; match the privacy notice
 kill_signal = "SIGINT"
 kill_timeout = 30                  # seconds to finish in-flight work and flush the backup
@@ -18,7 +18,7 @@ kill_timeout = 30                  # seconds to finish in-flight work and flush 
   TRUST_PROXY = "1"                # Fly's proxy is one hop in front of the app
   RETENTION_DAYS = "365"
   MAIL_TRANSPORT = "resend"        # or "postmark"; see README
-  PUBLIC_URL = "https://onboarding.example.com"   # change
+  PUBLIC_URL = "https://moc-yytcxa.fly.dev"   # change to your own domain later
   # Secrets (set with `fly secrets set`, not here): ADMIN_TOKEN, MAIL_API_KEY, MAIL_FROM,
   # MAIL_REPLY_TO, NOTIFY_TO. Backup secrets come from `fly storage create`.
 
