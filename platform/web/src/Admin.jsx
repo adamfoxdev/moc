@@ -9,7 +9,7 @@ const writeToken = (t) => { try { t ? sessionStorage.setItem(TOKEN_KEY, t) : ses
 const EMAIL_KIND = { confirmation: 'Confirmation to customer', 'team-new': 'Alert to team', 'team-update': 'Update alert to team' };
 const when = (iso) => new Date(iso).toLocaleString();
 
-function Detail({ r, statuses, token, onSaved, onDeleted }) {
+function Detail({ r, statuses, onSaved, onDeleted }) {
   const [status, setStatus] = useState(r.status);
   const [hold, setHold] = useState(r.hold);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -17,26 +17,26 @@ function Detail({ r, statuses, token, onSaved, onDeleted }) {
   const [msg, setMsg] = useState('');
   const [emails, setEmails] = useState(null);
   const loadEmails = useCallback(() => {
-    admin.get(token, r.id).then((d) => setEmails(d.emails)).catch(() => setEmails([]));
-  }, [token, r.id]);
+    admin.get(r.id).then((d) => setEmails(d.emails)).catch(() => setEmails([]));
+  }, [r.id]);
   useEffect(() => { setEmails(null); loadEmails(); }, [loadEmails]);
 
   async function doDelete() {
-    try { await admin.remove(token, r.id); onDeleted(r.id); } catch (e) { setMsg(e.message); }
+    try { await admin.remove(r.id); onDeleted(r.id); } catch (e) { setMsg(e.message); }
   }
   async function doExport() {
-    try { await admin.export(token, r.id); } catch (e) { setMsg(e.message); }
+    try { await admin.export(r.id); } catch (e) { setMsg(e.message); }
   }
 
   async function retry(id) {
-    try { await admin.retryEmail(token, id); setTimeout(loadEmails, 1500); setMsg('Retrying…'); }
+    try { await admin.retryEmail(id); setTimeout(loadEmails, 1500); setMsg('Retrying…'); }
     catch (e) { setMsg(e.message); }
   }
   // Reset the form only when a different request is opened, not after our own save.
   useEffect(() => { setStatus(r.status); setNotes(r.notes); setHold(r.hold); setConfirmDelete(false); setMsg(''); }, [r.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function save() {
-    try { onSaved(await admin.update(token, r.id, { status, notes, hold })); setMsg('Saved.'); }
+    try { onSaved(await admin.update(r.id, { status, notes, hold })); setMsg('Saved.'); }
     catch (e) { setMsg(e.message); }
   }
   const a = r.answers;
@@ -110,20 +110,79 @@ function Detail({ r, statuses, token, onSaved, onDeleted }) {
   );
 }
 
+const AUTH_ERRORS = {
+  denied: "That account isn't allowed to use this inbox. Ask an existing staff member to add you.",
+  failed: "Sign-in didn't complete. Please try again.",
+  unavailable: "The sign-in service can't be reached right now. Please try again shortly.",
+};
+
+function Activity() {
+  const [entries, setEntries] = useState(null);
+  const [error, setError] = useState('');
+  const load = () => admin.audit().then((d) => setEntries(d.entries)).catch((e) => setError(e.message));
+  return (
+    <details className="card activity" onToggle={(e) => { if (e.currentTarget.open && !entries) load(); }}>
+      <summary><strong>Activity log</strong> <span className="muted">Who signed in and what they did</span></summary>
+      {error && <p className="error" role="alert">{error}</p>}
+      {entries && (entries.length === 0 ? <p className="muted">Nothing yet.</p> : (
+        <table className="log">
+          <thead><tr><th>When</th><th>Who</th><th>What</th><th>Request</th><th>Detail</th></tr></thead>
+          <tbody>
+            {entries.slice(0, 100).map((e) => (
+              <tr key={e.id}><td>{when(e.at)}</td><td>{e.actor.replace(/^staff:/, '')}</td><td>{e.action}</td><td>{e.requestId}</td><td className="muted">{e.detail}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      ))}
+    </details>
+  );
+}
+
 export default function Admin() {
-  const [token, setToken] = useState(readToken);
+  const [mode, setMode] = useState(null); // null while checking, then 'oidc' or 'token'
+  const [staff, setStaff] = useState(null); // signed-in person (oidc mode)
+  const [token, setToken] = useState(readToken); // shared token (token mode)
   const [input, setInput] = useState('');
   const [data, setData] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(() => AUTH_ERRORS[new URLSearchParams(window.location.search).get('auth_error')] || '');
   const [selected, setSelected] = useState(null);
 
-  const load = useCallback(async (t) => {
-    try { setData(await admin.list(t)); setError(''); }
-    catch (e) { setData(null); setError(e.message); if (e.status === 401) { writeToken(''); setToken(''); } }
-  }, []);
-  useEffect(() => { if (token) load(token); }, [token, load]);
+  const signedOut = useCallback((message = '') => { admin.setAuth({}); setStaff(null); setData(null); setError(message); }, []);
+  const load = useCallback(async () => {
+    try { setData(await admin.list()); setError(''); }
+    catch (e) { if (e.status === 401) signedOut(e.message); else setError(e.message); }
+  }, [signedOut]);
 
-  if (!token) {
+  useEffect(() => {
+    admin.config().then((c) => setMode(c.mode)).catch((e) => { setMode('token'); setError(e.message); });
+  }, []);
+  useEffect(() => {
+    if (mode !== 'oidc') return;
+    admin.session().then((s) => { admin.setAuth({ csrf: s.csrf }); setStaff(s); }).catch(() => {});
+  }, [mode]);
+  useEffect(() => {
+    if (mode === 'token' && token) { admin.setAuth({ token }); load(); }
+  }, [mode, token, load]);
+  useEffect(() => { if (mode === 'oidc' && staff) load(); }, [mode, staff, load]);
+
+  async function signOut() {
+    if (mode === 'oidc') { try { await admin.logout(); } catch { /* the session may already be gone */ } }
+    writeToken(''); setToken(''); signedOut('');
+  }
+
+  if (mode === null) return <p className="muted">Loading…</p>;
+
+  if (mode === 'oidc' && !staff) {
+    return (
+      <div className="card narrow">
+        <h1>Staff sign-in</h1>
+        <p className="muted">Sign in with your work account to see requests.</p>
+        {error && <p className="error" role="alert">{error}</p>}
+        <a className="btn" href="/auth/login">Sign in</a>
+      </div>
+    );
+  }
+  if (mode === 'token' && !token) {
     return (
       <form className="card narrow" onSubmit={(e) => { e.preventDefault(); writeToken(input); setToken(input); }}>
         <h1>Requests</h1>
@@ -135,7 +194,7 @@ export default function Admin() {
       </form>
     );
   }
-  if (!data) return <p className="muted">{error || 'Loading…'}</p>;
+  if (!data) return <p className={error ? 'error' : 'muted'} role={error ? 'alert' : undefined}>{error || 'Loading…'}</p>;
 
   const current = data.requests.find((r) => r.id === selected);
   const removed = (id) => { setSelected(null); setData((d) => ({ ...d, requests: d.requests.filter((r) => r.id !== id) })); };
@@ -145,7 +204,10 @@ export default function Admin() {
     <div className="admin">
       <div className="bar2">
         <h1>Requests <span className="muted">({data.requests.length})</span></h1>
-        <button className="link" onClick={() => { writeToken(''); setToken(''); setData(null); }}>Sign out</button>
+        <span>
+          {staff && <span className="muted small" data-testid="who">Signed in as {staff.name || staff.email} ({staff.email}) · </span>}
+          <button className="link" onClick={signOut}>Sign out</button>
+        </span>
       </div>
       {data.requests.length === 0 ? <p className="muted">Nothing yet.</p> : (
         <div className="split">
@@ -161,9 +223,10 @@ export default function Admin() {
               </li>
             ))}
           </ul>
-          {current ? <Detail r={current} statuses={data.statuses} token={token} onSaved={merge} onDeleted={removed} /> : <p className="muted">Pick a request.</p>}
+          {current ? <Detail r={current} statuses={data.statuses} onSaved={merge} onDeleted={removed} /> : <p className="muted">Pick a request.</p>}
         </div>
       )}
+      <Activity />
     </div>
   );
 }

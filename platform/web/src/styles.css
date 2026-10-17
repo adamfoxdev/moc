@@ -102,3 +102,9 @@ footer.fine { padding-bottom: 32px; }
 .privacy h1 { font-size: 32px; }
 .privacy table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 12px 0; display: block; overflow-x: auto; }
 .privacy th, .privacy td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+
+.activity { margin-top: 24px; }
+.activity summary { cursor: pointer; }
+.log { border-collapse: collapse; width: 100%; font-size: 13px; margin-top: 12px; display: block; overflow-x: auto; }
+.log th, .log td { border-bottom: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; white-space: nowrap; }
+a.btn { text-decoration: none; }

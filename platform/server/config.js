@@ -20,3 +20,20 @@ export function productionProblems(env = process.env) {
   }
   return problems;
 }
+
+/** Things worth saying loudly at startup that should not stop the app. */
+export function productionWarnings(env = process.env) {
+  if (env.NODE_ENV !== 'production') return [];
+  const warnings = [];
+  const signIn = !!env.OIDC_ISSUER;
+  if (!signIn && env.ADMIN_TOKEN) {
+    warnings.push('Staff sign-in is not configured: the single shared ADMIN_TOKEN is the only protection for /admin. Configure OIDC_* and ADMIN_EMAILS.');
+  }
+  if (signIn && env.ADMIN_TOKEN && env.ALLOW_ADMIN_TOKEN === 'true') {
+    warnings.push('ALLOW_ADMIN_TOKEN=true: the shared token still works alongside staff sign-in. Remove it once sign-in is proven.');
+  }
+  if (!signIn && !env.ADMIN_TOKEN) {
+    warnings.push('Neither staff sign-in nor ADMIN_TOKEN is set: /admin is disabled, so nobody can read requests except through email alerts.');
+  }
+  return warnings;
+}

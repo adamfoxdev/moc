@@ -7,6 +7,7 @@ import { validateAnswers, validateAdminUpdate } from './validate.js';
 import { recommend } from './recommend.js';
 import { STATUSES } from './db.js';
 import { noticeVersion as currentNoticeVersion } from './notice.js';
+import { createAuth, authConfigFromEnv } from './auth.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const dist = join(here, '..', 'dist');
@@ -24,6 +25,8 @@ export function createApp({
   serveStatic = true,
   hsts = process.env.NODE_ENV === 'production',
   maxAdminFailures = 10,
+  authConfig = authConfigFromEnv(),
+  authDeps = {},
 } = {}) {
   const app = express();
   app.disable('x-powered-by');
@@ -45,15 +48,29 @@ export function createApp({
 
   // Minimal in-memory limiter for the public form. Good enough for one
   // instance; put a shared limiter in front when this is scaled out.
-  const hits = new Map();
-  const limited = (ip) => {
-    const now = Date.now();
-    const recent = (hits.get(ip) || []).filter((t) => now - t < windowMs);
-    if (recent.length >= maxSubmissions) { hits.set(ip, recent); return true; }
-    recent.push(now);
-    hits.set(ip, recent);
-    return false;
+  const makeLimiter = (max) => {
+    const hits = new Map();
+    return (ip) => {
+      const now = Date.now();
+      const recent = (hits.get(ip) || []).filter((t) => now - t < windowMs);
+      if (recent.length >= max) { hits.set(ip, recent); return true; }
+      recent.push(now);
+      hits.set(ip, recent);
+      return false;
+    };
   };
+  const limited = makeLimiter(maxSubmissions);
+
+  // Staff sign-in (OpenID Connect). Without it, the shared ADMIN_TOKEN is used.
+  const auth = createAuth({
+    store,
+    config: authConfig,
+    limiter: makeLimiter(30),
+    audit: (actor, action, requestId, detail) => store.audit(actor, action, requestId, detail),
+    ...authDeps,
+  });
+  const actor = (req) => (req.staff ? `staff:${req.staff.email}` : 'admin');
+  const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
   // Notification problems must never fail or slow a customer's request.
   const safely = (fn) => { try { fn(); } catch (e) { console.error('notification', e); } };
@@ -156,7 +173,19 @@ export function createApp({
   // Wrong tokens can only be tried so many times per address in a window.
   const failures = new Map();
   admin.use((req, res, next) => {
-    if (!adminToken) return res.status(503).json({ error: 'Admin is disabled. Set ADMIN_TOKEN to enable it.' });
+    if (auth.enabled) {
+      const staff = auth.sessionFor(req);
+      if (staff) {
+        // Cookie sessions need a CSRF token on anything that changes data.
+        if (!SAFE_METHODS.has(req.method) && !auth.csrfOk(req, staff)) {
+          return res.status(403).json({ error: 'Missing or invalid CSRF token.' });
+        }
+        req.staff = staff;
+        return next();
+      }
+      if (!auth.allowAdminToken) return res.status(401).json({ error: 'Sign in required.' });
+    }
+    if (!adminToken) return res.status(auth.enabled ? 401 : 503).json({ error: 'Admin is disabled. Set ADMIN_TOKEN, or configure staff sign-in.' });
     const now = Date.now();
     const recent = (failures.get(req.ip) || []).filter((t) => now - t < windowMs);
     if (recent.length >= maxAdminFailures) {
@@ -171,27 +200,38 @@ export function createApp({
     }
     next();
   });
+  admin.get('/session', (req, res) => {
+    res.json(req.staff
+      ? { mode: 'oidc', email: req.staff.email, name: req.staff.name, csrf: req.staff.csrf }
+      : { mode: 'token', email: '', name: '', csrf: '' });
+  });
+  admin.post('/logout', (req, res) => {
+    if (req.staff) { store.audit(actor(req), 'logout'); auth.endSession(res, req.staff); }
+    res.json({ ok: true });
+  });
   admin.get('/requests', (_req, res) => res.json({ statuses: STATUSES, requests: store.list() }));
   admin.get('/requests/:id', (req, res) => {
     const r = store.get(req.params.id);
     if (!r) return res.status(404).json({ error: 'Not found.' });
+    store.audit(actor(req), 'view', r.id);
     res.json({ ...r, emails: store.emailsFor(r.id) });
   });
   admin.post('/emails/:id/retry', (req, res) => {
     const id = Number(req.params.id);
     if (!Number.isInteger(id) || !store.retryEmail(id)) return res.status(404).json({ error: 'No failed email with that id.' });
+    store.audit(actor(req), 'retry-email', '', `email ${id}`);
     safely(() => notifier?.kick?.());
     res.json({ ok: true });
   });
   admin.get('/requests/:id/export', (req, res) => {
     const r = store.get(req.params.id);
     if (!r) return res.status(404).json({ error: 'Not found.' });
-    store.audit('admin', 'export', r.id);
+    store.audit(actor(req), 'export', r.id);
     download(res, `northbound-request-${r.id}-full.json`, { ...r, emails: store.emailsFor(r.id), audit: store.auditFor(r.id) });
   });
   admin.delete('/requests/:id', (req, res) => {
     if (!store.deleteRequest(req.params.id)) return res.status(404).json({ error: 'Not found.' });
-    store.audit('admin', 'delete', req.params.id);
+    store.audit(actor(req), 'delete', req.params.id);
     res.json({ deleted: true });
   });
   admin.get('/audit', (_req, res) => res.json({ entries: store.auditList() }));
@@ -199,10 +239,12 @@ export function createApp({
     const { ok, errors, value } = validateAdminUpdate(req.body, STATUSES);
     if (!ok) return res.status(400).json({ errors });
     if (!store.updateAdmin(req.params.id, value)) return res.status(404).json({ error: 'Not found.' });
+    store.audit(actor(req), 'update', req.params.id, `changed: ${Object.keys(value).join(', ')}`);
     res.json(store.get(req.params.id));
   });
   app.use('/api/admin', admin);
 
+  app.use('/auth', auth.router);
   app.use('/api', (_req, res) => res.status(404).json({ error: 'Not found.' }));
 
   if (serveStatic && existsSync(dist)) {

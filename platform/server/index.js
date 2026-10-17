@@ -3,7 +3,8 @@ import { createStore } from './db.js';
 import { createMailer, mailConfigFromEnv } from './mail.js';
 import { createNotifier } from './notifier.js';
 import { createRetention } from './retention.js';
-import { productionProblems } from './config.js';
+import { productionProblems, productionWarnings } from './config.js';
+import { authConfigFromEnv } from './auth.js';
 
 const problems = productionProblems();
 if (problems.length) {
@@ -11,15 +12,24 @@ if (problems.length) {
   process.exit(1);
 }
 
+let authConfig;
+try { authConfig = authConfigFromEnv(); } catch (e) {
+  console.error(`Staff sign-in is misconfigured: ${e.message}`);
+  process.exit(1);
+}
+for (const w of productionWarnings()) console.warn(`WARNING: ${w}`);
+
 const store = createStore();
 const mailConfig = mailConfigFromEnv(); // throws with a clear message if SMTP is half-configured
 const notifier = createNotifier({ store, mailer: createMailer(mailConfig), config: mailConfig });
-const app = createApp({ store, notifier });
+const app = createApp({ store, notifier, authConfig });
 const port = Number(process.env.PORT) || 3001;
 
 const server = app.listen(port, () => {
   console.log(`Northbound onboarding API on http://localhost:${port}`);
-  if (!process.env.ADMIN_TOKEN) console.log('ADMIN_TOKEN is not set: the /admin view is disabled.');
+  if (authConfig) console.log(`Admin: staff sign-in via ${authConfig.issuer} (${authConfig.allowedEmails.size} allowed address${authConfig.allowedEmails.size === 1 ? '' : 'es'})`);
+  else if (process.env.ADMIN_TOKEN) console.log('Admin: shared ADMIN_TOKEN (set OIDC_* and ADMIN_EMAILS for staff sign-in)');
+  else console.log('Admin is disabled: set OIDC_* and ADMIN_EMAILS, or ADMIN_TOKEN.');
   console.log(`Email: ${mailConfig.transport === 'smtp' ? `SMTP via ${mailConfig.smtp.host}` : 'log only (nothing is sent; set MAIL_TRANSPORT=smtp)'}`);
   if (!mailConfig.notifyTo.length) console.log('NOTIFY_TO is not set: the team will not be emailed about new requests.');
 });

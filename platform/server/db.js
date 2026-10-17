@@ -64,6 +64,17 @@ export function createStore(path = process.env.DB_PATH || defaultPath) {
     CREATE INDEX IF NOT EXISTS outbox_due ON outbox (status, next_attempt_at);
     CREATE INDEX IF NOT EXISTS outbox_request ON outbox (request_id);
 
+    -- Staff sessions. Only a hash of the session id is stored, so a database copy cannot be used to sign in.
+    CREATE TABLE IF NOT EXISTS sessions (
+      id_hash TEXT PRIMARY KEY,
+      email TEXT NOT NULL,
+      name TEXT NOT NULL DEFAULT '',
+      csrf TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      last_seen INTEGER NOT NULL,
+      expires_at INTEGER NOT NULL
+    );
+
     -- A record of deletions and exports. It holds a request reference and an
     -- action, never names, emails or request content.
     CREATE TABLE IF NOT EXISTS audit (
@@ -100,6 +111,11 @@ export function createStore(path = process.env.DB_PATH || defaultPath) {
   const expired = db.prepare(`SELECT id FROM requests WHERE updated_at < ? AND hold = 0 AND status != 'working'`);
   const insertAudit = db.prepare('INSERT INTO audit (at, actor, action, request_id, detail) VALUES (?, ?, ?, ?, ?)');
   const selectAudit = db.prepare('SELECT * FROM audit ORDER BY id DESC LIMIT ?');
+  const insertSession = db.prepare('INSERT INTO sessions (id_hash, email, name, csrf, created_at, last_seen, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?)');
+  const selectSession = db.prepare('SELECT * FROM sessions WHERE id_hash = ?');
+  const touchSession = db.prepare('UPDATE sessions SET last_seen = ? WHERE id_hash = ?');
+  const deleteSession = db.prepare('DELETE FROM sessions WHERE id_hash = ?');
+  const purgeSessions = db.prepare('DELETE FROM sessions WHERE expires_at < ?');
   const auditFor = db.prepare('SELECT * FROM audit WHERE request_id = ? ORDER BY id');
 
   const insertEmail = db.prepare(`INSERT INTO outbox (created_at, kind, request_id, to_addr, next_attempt_at)
@@ -176,6 +192,14 @@ export function createStore(path = process.env.DB_PATH || defaultPath) {
     audit(actor, action, requestId = '', detail = '', at = new Date()) {
       insertAudit.run(at.toISOString(), actor, action, requestId, String(detail).slice(0, 300));
     },
+    createSession: (s) => { insertSession.run(s.idHash, s.email, s.name || '', s.csrf, s.now, s.now, s.expiresAt); },
+    getSession: (idHash) => {
+      const r = selectSession.get(idHash);
+      return r ? { idHash: r.id_hash, email: r.email, name: r.name, csrf: r.csrf, createdAt: r.created_at, lastSeen: r.last_seen, expiresAt: r.expires_at } : null;
+    },
+    touchSession: (idHash, now) => { touchSession.run(now, idHash); },
+    deleteSession: (idHash) => { deleteSession.run(idHash); },
+    purgeExpiredSessions: (now) => { purgeSessions.run(now); },
     auditList: (limit = 200) => selectAudit.all(limit).map(auditRow),
     auditFor: (requestId) => auditFor.all(requestId).map(auditRow),
     enqueueEmail({ kind, requestId, to, at = new Date() }) {

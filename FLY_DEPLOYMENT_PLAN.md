@@ -53,12 +53,13 @@ flowchart LR
 | `GET /api/ready` | Fly's health check: fails if the database is unreachable (`/api/health` stays as a plain liveness check) |
 | `server/mail.js`: `resend` and `postmark` transports | Fly.io restricts outbound SMTP (verify which ports), so email goes over HTTPS. Permanent rejections (bad address, bad key, unverified domain) are not retried; rate limits and provider outages are |
 | `server/config.js` + `server/index.js` | In production the app **refuses to start** if `MAIL_TRANSPORT=log` (it would print personal data to logs), `PUBLIC_URL` is not `https://`, `NOTIFY_TO` is empty, or `ADMIN_TOKEN` is under 24 characters |
-| Admin sign-in limiter | Ten wrong tokens per address per 15 minutes locks that address out of `/api/admin` |
+| **Staff sign-in (OpenID Connect)** | Named accounts instead of one shared token: Entra ID, Google or Okta, an email allowlist, server-side sessions, CSRF protection and a per-person activity log (`platform/README.md`, Staff sign-in). The shared token is off once it is configured |
+| Admin sign-in limiter | Ten wrong tokens per address per 15 minutes locks that address out of `/api/admin`; sign-in attempts are limited too |
 | Security headers | Content-Security-Policy (everything from this origin only), HSTS in production, Permissions-Policy |
 | `site/` (Dockerfile, nginx config, `fly.toml`, `deploy.sh`) | Marketing page on Fly with security headers |
 | `.github/workflows/platform.yml` | Test and build on every change; deploy from `main` |
 
-Tests: 40 pass, including the mail transports against fake HTTP servers, production checks, readiness, headers, the admin lockout and WAL mode.
+Tests: 52 pass, including staff sign-in against a fake provider and attack cases, and the mail transports against fake HTTP servers, production checks, readiness, headers, the admin lockout and WAL mode.
 
 ---
 
@@ -73,7 +74,7 @@ Tests: 40 pass, including the mail transports against fake HTTP servers, product
 | 5 | **Where the marketing site lives** | A second Fly app (included) or any static host (GitHub Pages, Cloudflare Pages) | Fly is simplest to keep in one place |
 | 6 | **Backup retention** | 168 hours (7 days), set in `litestream.yml` | Deleted data stays in backups this long; the privacy notice must say so |
 | 7 | **Who is on call, and how they are alerted** | A named person | Alerts are only useful if someone gets them |
-| 8 | **Staff sign-in** | Shared token for the pilot; then sign-in in front of `/admin` | Section 9 |
+| 8 | **Identity provider for staff sign-in** | Microsoft Entra ID (single tenant) if staff have Microsoft 365; otherwise Google | Needs an app registration, redirect URI and an allowlist; see `platform/README.md` |
 
 ---
 
@@ -96,7 +97,11 @@ fly storage create --app northbound-onboarding
 
 # 3. Secrets (the email API key comes from Resend or Postmark after you verify your domain)
 fly secrets set --app northbound-onboarding \
-  ADMIN_TOKEN="$(openssl rand -hex 32)" \
+  OIDC_ISSUER="https://login.microsoftonline.com/<tenant-id>/v2.0" \
+  OIDC_CLIENT_ID="..." \
+  OIDC_CLIENT_SECRET="..." \
+  ADMIN_EMAILS="you@example.com,colleague@example.com" \
+  SESSION_SECRET="$(openssl rand -hex 32)" \
   MAIL_API_KEY="..." \
   MAIL_FROM="Northbound <onboarding@mail.example.com>" \
   MAIL_REPLY_TO="hello@example.com" \
@@ -137,7 +142,8 @@ Set in `fly.toml` (not secret) or with `fly secrets set` (secret):
 | `TRUST_PROXY` | `fly.toml` | `1` (Fly's proxy is one hop). **Test after deploy** that a forged `X-Forwarded-For` does not bypass the submission limit |
 | `RETENTION_DAYS` | `fly.toml` | `365`; `0` disables |
 | `MAIL_TRANSPORT` | `fly.toml` | `resend` or `postmark` (`smtp` if your host allows it; `log` is refused in production) |
-| `ADMIN_TOKEN` | secret | At least 24 characters |
+| `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `ADMIN_EMAILS`, `SESSION_SECRET` | secret | Staff sign-in. Register `https://<PUBLIC_URL host>/auth/callback` with the provider. `SESSION_SECRET` is 32+ random characters |
+| `ADMIN_TOKEN` | secret, optional | Only for the first deploy or break-glass; ignored once sign-in is configured unless `ALLOW_ADMIN_TOKEN=true`. At least 24 characters |
 | `MAIL_API_KEY` | secret | Resend or Postmark key |
 | `MAIL_FROM`, `MAIL_REPLY_TO`, `NOTIFY_TO` | secret | `NOTIFY_TO` should be a shared mailbox with a retention rule (privacy notice Part C item 11) |
 | `BUCKET_NAME`, `AWS_*` | secret (set by `fly storage create`) | If `BUCKET_NAME` is missing the app still starts but warns loudly that it is **not backed up** |
@@ -189,7 +195,7 @@ Set in `fly.toml` (not secret) or with `fly secrets set` (secret):
 - **Tigris bucket** must be private; keys are created per app by `fly storage create`.
 - **Email domain:** SPF, DKIM, DMARC (section 5).
 - **Dependency hygiene:** Dependabot or similar on `npm`, `npm audit` in CI, and rebuild the image periodically for base-image patches.
-- **Staff sign-in:** the shared token is the weakest point. Options for phase 2, none built yet: put an identity-aware proxy in front of `/admin` and `/api/admin` (for example Cloudflare Access or Tailscale), or add OIDC sign-in to the app. Until then keep the token long, rotate it when staff change (`fly secrets set ADMIN_TOKEN=…`), and watch for failed-login lockouts in the logs.
+- **Staff sign-in:** built (OpenID Connect). Review the `ADMIN_EMAILS` list quarterly, require MFA at the identity provider (Conditional Access in Entra), remove the shared token (`fly secrets unset ADMIN_TOKEN`) once sign-in works, and watch the activity log and `login-failed` entries. Break-glass if the identity provider is down: set `ALLOW_ADMIN_TOKEN=true` with a fresh `ADMIN_TOKEN`, then remove them again.
 - **Static marketing page CSP** allows inline script and style because the page has one of each; moving them to files would allow a strict policy.
 
 **Data protection alignment** (for counsel):
@@ -235,6 +241,7 @@ Set in `fly.toml` (not secret) or with `fly secrets set` (secret):
 - Anything on Fly.io itself: `fly.toml` syntax and behaviour, volumes, health checks, the proxy, certificates, `TRUST_PROXY=1` with Fly's headers.
 - Litestream to **Tigris** (the test used a local file replica, so credentials, endpoint and region settings are unproven).
 - **Live** Resend or Postmark delivery, domain verification, spam placement.
+- Staff sign-in against a **real** identity provider (Entra, Google). It was tested against a stand-in that follows the standard flow; claim names, issuer format and consent screens in your tenant are unproven.
 - The GitHub Actions workflow and the `site/` deploy script.
 
 Plan a rehearsal on a staging app that exercises each of these before production.
@@ -267,7 +274,8 @@ Plan a rehearsal on a staging app that exercises each of these before production
 **Platform**
 - [ ] One machine, one volume, one region; `fly status` healthy
 - [ ] `BUCKET_NAME` set; no litestream errors in `fly logs`; a **restore rehearsal passed**
-- [ ] Secrets set; app starts in production mode (the safety checks pass)
+- [ ] Secrets set; app starts in production mode (the safety checks pass, no startup warnings)
+- [ ] Staff sign-in works against the real identity provider (allowed person in, others refused, MFA enforced), and `ADMIN_TOKEN` removed
 - [ ] `TRUST_PROXY` verified; both rate limits work
 - [ ] Custom domains with certificates; HTTPS redirect and HSTS present
 

@@ -27,12 +27,16 @@ ADMIN_TOKEN=choose-a-long-secret npm start     # everything on http://localhost:
 ```
 
 - Customer site: `/`
-- Our inbox: `/admin` (enter the admin token). Without `ADMIN_TOKEN` the admin API is disabled.
+- Our inbox: `/admin`. Staff sign in with their own work accounts (see Staff sign-in below). For local development only, a shared `ADMIN_TOKEN` works when sign-in is not configured.
 - Tests: `npm test`
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `ADMIN_TOKEN` | none (admin off) | Secret for the `/admin` view |
+| `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` | none | Your identity provider (staff sign-in) |
+| `ADMIN_EMAILS` | none | Comma-separated staff addresses allowed to sign in |
+| `SESSION_SECRET` | none | 32+ random characters; signs the short-lived login state |
+| `ALLOW_ADMIN_TOKEN` | `false` | Keep the shared token working alongside sign-in (break-glass; remove when proven) |
+| `ADMIN_TOKEN` | none | Shared secret for `/admin` when staff sign-in is **not** configured (development and early pilots) |
 | `NOTIFY_TO` | none | Comma-separated team addresses for new-request alerts |
 | `MAIL_TRANSPORT` | `log` | `log` (print only, not allowed in production), `smtp`, `resend` or `postmark` |
 | `MAIL_FROM`, `MAIL_REPLY_TO` | placeholder, `MAIL_FROM` | Sender, and where customer replies go |
@@ -84,6 +88,29 @@ How it is built:
 
 Setup: copy `.env.example` to `.env`, then `node --env-file=.env server/index.js`. By default `MAIL_TRANSPORT=log` prints emails to the console and sends nothing (development only: production refuses to start with it). For real sending set `MAIL_TRANSPORT` to `resend` or `postmark` (HTTPS APIs, which work on Fly.io where outbound SMTP is restricted) with `MAIL_API_KEY` and `MAIL_FROM`, or to `smtp` with `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`. Half-configured settings stop the server at startup with a clear message. Use a sending domain with SPF, DKIM and DMARC set up, or confirmations will land in spam.
 
+## Staff sign-in
+
+`/admin` uses **OpenID Connect** (authorization code flow with PKCE), so it works with Microsoft Entra ID, Google, Okta and similar. Staff get named accounts, MFA and offboarding from the identity provider, and everything they do is attributed to them.
+
+- **Allowlist.** Only the addresses in `ADMIN_EMAILS` can get in, even if the identity provider would sign others in. The email comes from the `email` claim, or `preferred_username` (Entra often omits `email`). Tokens with `email_verified: false` are refused.
+- **Tokens are checked properly:** signature against the provider's published keys, issuer, audience, expiry, and a per-login nonce; the authorization code is bound to the login by PKCE, and the login state is a signed, 10-minute, HttpOnly cookie.
+- **Sessions** are server-side. Only a hash of the session id is stored. The cookie is `HttpOnly`, `SameSite=Lax`, and `Secure` with the `__Host-` prefix when `PUBLIC_URL` is https. They end after 2 hours idle or 12 hours total, and on sign-out.
+- **CSRF.** Anything that changes data must carry a per-session token in `X-CSRF-Token` (the admin page does this).
+- **Accountability.** The audit log records who signed in, viewed a request, edited it, exported, deleted, retried an email, and signed out (by staff email), plus refused sign-ins (by email domain only). The admin page shows the last 100 entries under "Activity log".
+- **The shared token is switched off** once sign-in is configured (unless `ALLOW_ADMIN_TOKEN=true`). Production start-up prints a warning if sign-in is missing or the token fallback is left on.
+- **Rate limited:** sign-in attempts per address; wrong shared tokens lock out.
+
+**Setting it up with Microsoft Entra ID** (steps not yet verified against a live tenant):
+
+1. Entra admin centre > App registrations > New registration. Single tenant. Redirect URI (type Web): `https://<PUBLIC_URL host>/auth/callback`.
+2. Certificates and secrets > new client secret (note the value) and the Application (client) ID.
+3. Optional but recommended: token configuration > add the `email` optional claim; Enterprise application > Properties > **Assignment required = Yes**, then assign only the staff group. Apply a Conditional Access policy requiring MFA.
+4. Settings: `OIDC_ISSUER=https://login.microsoftonline.com/<tenant-id>/v2.0`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `ADMIN_EMAILS`, `SESSION_SECRET` (`openssl rand -hex 32`). Use the **single-tenant** issuer; do not use the `common` or `organizations` endpoints.
+
+For Google use `OIDC_ISSUER=https://accounts.google.com`.
+
+**Trying it locally without a real provider:** `server/testing/fake-idp.js` is a stand-in OpenID provider used by the tests. It is not for production.
+
 ## Privacy: retention, export, deletion, notice
 
 - **Automatic deletion.** A daily job deletes requests with no activity for `RETENTION_DAYS` (default 365; `0` turns it off), together with their email records. Requests with status **Working together** (clients) and requests marked **Keep** in `/admin` are exempt. Activity means the customer adding detail or staff saving a change.
@@ -100,7 +127,7 @@ Setup: copy `.env.example` to `.env`, then `node --env-file=.env server/index.js
 - Parameterised SQL only.
 - Rate limit on submissions (5 per 15 minutes per IP, in memory) and a honeypot field.
 - Email sending is queued, retried, capped per address and escaped (see above).
-- Admin endpoints require a token compared in constant time, and are off by default.
+- Staff sign-in with named accounts (see above); admin is off unless sign-in or a token is configured.
 - Security headers (`nosniff`, frame denial, same-origin referrer).
 - The form asks people not to send passwords, keys or customer data.
 
@@ -121,7 +148,7 @@ Things to know: run **one** machine only (the volume and the email worker are si
 
 ## Known limits (deliberate, for a first version)
 
-- **Single admin token**, not named users. Next step: Entra ID sign-in for staff.
+- **One staff role.** Everyone on the allowlist can view, edit, export and delete. Add roles if you need read-only staff.
 - **Rate limiting is per process.** Use a shared store or gateway limit if you run more than one instance.
 - **One machine only.** SQLite on one volume cannot be shared, and the email worker would double-send. Before scaling out, add an outbox lease and move to a database several machines can use (LiteFS or Postgres by replacing `server/db.js`). It holds personal data, so see `DPA.md` and your privacy notice.
 - **The privacy notice is still a draft for counsel** (`../PRIVACY_NOTICE.md`). It is linked everywhere, but shows a draft banner until the placeholders are filled in. Open items in its Part C: edit-token expiry, console logging of emails in `log` mode, mailbox and backup retention, admin sign-in and hosting logs.

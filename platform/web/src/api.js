@@ -41,14 +41,26 @@ export const downloadMine = (id, token) =>
 export const deleteMine = (id, token) =>
   request(`/api/requests/${id}`, { method: 'DELETE', headers: { 'x-edit-token': token } });
 
+// Staff requests carry either the shared token (token mode) or the signed-in session's cookie plus a
+// CSRF token (sign-in mode). The cookie is sent automatically; the CSRF token must be added by hand.
+const staffAuth = { token: '', csrf: '' };
+const staffHeaders = () => ({
+  ...(staffAuth.token ? { 'x-admin-token': staffAuth.token } : {}),
+  ...(staffAuth.csrf ? { 'x-csrf-token': staffAuth.csrf } : {}),
+});
+
 export const admin = {
-  export: (token, id) => download(`/api/admin/requests/${id}/export`, { 'x-admin-token': token }, `northbound-request-${id}-full.json`),
-  remove: (token, id) => request(`/api/admin/requests/${id}`, { method: 'DELETE', headers: { 'x-admin-token': token } }),
-  list: (token) => request('/api/admin/requests', { headers: { 'x-admin-token': token } }),
-  get: (token, id) => request(`/api/admin/requests/${id}`, { headers: { 'x-admin-token': token } }),
-  retryEmail: (token, id) => request(`/api/admin/emails/${id}/retry`, { method: 'POST', headers: { 'x-admin-token': token } }),
-  update: (token, id, body) =>
-    request(`/api/admin/requests/${id}`, { method: 'PATCH', body, headers: { 'x-admin-token': token } }),
+  setAuth: ({ token = '', csrf = '' }) => { staffAuth.token = token; staffAuth.csrf = csrf; },
+  config: () => request('/auth/config'),
+  session: () => request('/api/admin/session', { headers: staffHeaders() }),
+  logout: () => request('/api/admin/logout', { method: 'POST', headers: staffHeaders() }),
+  audit: () => request('/api/admin/audit', { headers: staffHeaders() }),
+  export: (id) => download(`/api/admin/requests/${id}/export`, staffHeaders(), `northbound-request-${id}-full.json`),
+  remove: (id) => request(`/api/admin/requests/${id}`, { method: 'DELETE', headers: staffHeaders() }),
+  list: () => request('/api/admin/requests', { headers: staffHeaders() }),
+  get: (id) => request(`/api/admin/requests/${id}`, { headers: staffHeaders() }),
+  retryEmail: (id) => request(`/api/admin/emails/${id}/retry`, { method: 'POST', headers: staffHeaders() }),
+  update: (id, body) => request(`/api/admin/requests/${id}`, { method: 'PATCH', body, headers: staffHeaders() }),
 };
 
 // Session storage is a convenience only: it can be blocked or empty.

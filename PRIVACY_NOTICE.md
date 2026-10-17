@@ -110,7 +110,7 @@ We may also disclose information if the law requires it or to protect rights, sa
 
 ## 7. Security
 
-We protect your data with measures suited to the risk, including access limited to people who need it, a secret token for staff access, encryption in transit, a limit on how fast requests can be made, and logging. {{Add encryption at rest and backup details once the production hosting is decided and the statement can be verified.}} No system is perfectly secure; if a breach affects you, we'll tell you and the authorities where the law requires.
+We protect your data with measures suited to the risk, including access limited to named staff who sign in with their own work accounts, encryption in transit, a limit on how fast requests can be made, and logging. {{Add encryption at rest and backup details once the production hosting is decided and the statement can be verified.}} No system is perfectly secure; if a breach affects you, we'll tell you and the authorities where the law requires.
 
 ## 8. Your rights
 
@@ -150,7 +150,7 @@ We'll update this notice when what we do changes, and change the date at the top
 
 ## B1. Data map (as the code works today)
 
-Also stored: `consent_at` and `notice_version` (when consent was given and which version of the public notice, identified by a short fingerprint, was shown); an `audit` table recording deletions and exports by reference and action only (no names, emails or content); and a `hold` flag that exempts a request from automatic deletion.
+Also stored: staff sessions (a hash of the session id, the staff member's email and name, and expiry; deleted on sign-out, expiry, and at each sign-in), and in the `audit` table the **staff member's email** against each sign-in, view, edit, export, deletion and email retry (staff personal data: say so in the staff privacy information, and set a retention period for the audit log, which is currently kept indefinitely); `consent_at` and `notice_version` (when consent was given and which version of the public notice, identified by a short fingerprint, was shown); an `audit` table that records actions by reference and action, never customers' names, emails or content; and a `hold` flag that exempts a request from automatic deletion.
 
 | Data | Where stored | Who can access | Retention in code today |
 |---|---|---|---|
@@ -207,7 +207,7 @@ Gaps between what the notice promises and what the code does. Items 1 to 4 are b
 | 5 | **Edit token never expires** | Long-lived bearer secret for personal data | Expire after, for example, 30 days; consider hashing it in the database |
 | 6 | **Console logging of email text** (DONE) | `MAIL_TRANSPORT=log` printed personal data to the logs | In production the app refuses to start with the `log` transport (and with an unsafe `PUBLIC_URL`, missing `NOTIFY_TO` or a short `ADMIN_TOKEN`). `log` remains for local development only. |
 | 7 | **Encryption at rest** | Notice section 7 must not claim more than is verified | Hosting is a Fly.io volume with continuous backup to a Tigris bucket. **Verify and then state** whether volumes and buckets are encrypted at rest; claim encryption in transit (HTTPS, TLS to the bucket and email API) only once checked. See `FLY_DEPLOYMENT_PLAN.md` section 12 |
-| 8 | **Single shared admin token, no named users** (PARTLY DONE) | Weak accountability for who viewed personal data | Wrong-token attempts are now rate limited (lockout per address) and deletions/exports are audited. Still open: named staff sign-in (an identity-aware proxy in front of `/admin`, or OIDC in the app) |
+| 8 | **Staff sign-in and accountability** (DONE) | Weak accountability for who viewed personal data | Staff sign in with their own work accounts through OpenID Connect (allowlist, MFA from the identity provider), sessions are server-side with CSRF protection, and the audit log records who signed in, viewed, edited, exported and deleted. Still open: roles (read-only staff), and a review of who is on the allowlist each quarter |
 | 9 | **Hosting and proxy logs not configured** | Notice says logs are kept for a set period | Set retention on the hosting platform and mask IPs if possible |
 | 10 | **Cookie/storage statement** | Must stay true | Re-check whenever anyone adds analytics, fonts, embeds or chat widgets |
 | 11 | **Copies in mailboxes** | Deleting a request does not delete emails already sent. The team alert lands in the `NOTIFY_TO` mailbox and the confirmation in the customer's | Set a retention rule on the team mailbox (or use a shared mailbox with auto-delete) and say so in the notice; the delete screen already tells people about this |

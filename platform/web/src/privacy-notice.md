@@ -95,7 +95,7 @@ We may also disclose information if the law requires it or to protect rights, sa
 
 ## 7. Security
 
-We protect your data with measures suited to the risk, including access limited to people who need it, a secret token for staff access, encryption in transit, a limit on how fast requests can be made, and logging. {{Add encryption at rest and backup details once the production hosting is decided and the statement can be verified.}} No system is perfectly secure; if a breach affects you, we'll tell you and the authorities where the law requires.
+We protect your data with measures suited to the risk, including access limited to named staff who sign in with their own work accounts, encryption in transit, a limit on how fast requests can be made, and logging. {{Add encryption at rest and backup details once the production hosting is decided and the statement can be verified.}} No system is perfectly secure; if a breach affects you, we'll tell you and the authorities where the law requires.
 
 ## 8. Your rights
 

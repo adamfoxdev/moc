@@ -4,7 +4,7 @@ import http from 'node:http';
 import { createApp } from './app.js';
 import { createStore } from './db.js';
 import { mailConfigFromEnv, createMailer } from './mail.js';
-import { productionProblems } from './config.js';
+import { productionProblems, productionWarnings } from './config.js';
 
 const goodProd = { NODE_ENV: 'production', MAIL_TRANSPORT: 'resend', MAIL_API_KEY: 'k', MAIL_FROM: 'a@b.c', PUBLIC_URL: 'https://x.test', NOTIFY_TO: 'team@x.test', ADMIN_TOKEN: 'x'.repeat(32) };
 
@@ -133,4 +133,13 @@ test('database: file databases use WAL (needed for continuous backup)', async ()
     check.close();
     store.close();
   } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('production warnings: token-only admin, leftover token fallback, and no admin at all are called out', () => {
+  assert.deepEqual(productionWarnings({}), [], 'silent outside production');
+  const base = { NODE_ENV: 'production' };
+  assert.match(productionWarnings({ ...base, ADMIN_TOKEN: 'x'.repeat(30) }).join(), /shared ADMIN_TOKEN is the only protection/);
+  assert.match(productionWarnings(base).join(), /\/admin is disabled/);
+  assert.match(productionWarnings({ ...base, OIDC_ISSUER: 'https://i', ADMIN_TOKEN: 'x'.repeat(30), ALLOW_ADMIN_TOKEN: 'true' }).join(), /still works alongside/);
+  assert.deepEqual(productionWarnings({ ...base, OIDC_ISSUER: 'https://i' }), []);
 });
