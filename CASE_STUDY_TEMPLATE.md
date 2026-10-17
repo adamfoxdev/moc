@@ -4,7 +4,7 @@
 >
 > **Rules that matter more than polish:**
 > 1. **Every number must be real, sourced and client-approved.** No invented clients, quotes or metrics. If a result can't be evidenced, describe it qualitatively or leave it out.
-> 2. **Client permission first.** `MSA.md` clause 15.6 bars naming a client or using its logo without written consent. Get consent in writing before drafting, and again for the final text.
+> 2. **Client permission first.** `MSA.md` clause 15.6 bars naming a client or using its logo without written consent. Ask for the consent level in the SOW at signing (level 3 allows a case study), then get the client's written approval of the final text, figures and quotes before publishing. Honour withdrawal within 30 days.
 > 3. **Protect confidentiality.** Don't reveal architecture details, vulnerabilities, data or people that the client or the NDA/MSA (clause 7) protects. If the client won't be named, anonymise (section 4).
 > 4. **Be honest about AI.** Say what was AI-generated, what was human-engineered, and what the AI features achieved, measured against the agreed evaluation (`SOW_POC.md`).
 
@@ -176,7 +176,8 @@ If the client will not be named:
 
 ## 5. Approval checklist (complete before publishing)
 
-- [ ] Written client consent for naming, logo, quote and metrics (record location: {{LINK}})
+- [ ] SOW publicity level is 3 (case study), or anonymised use is agreed (MSA clause 15.6(b)/(e)); record the SOW reference: {{SOW_NO}}
+- [ ] Client's written approval of the final text, figures, images and quote (MSA clause 15.6(c)); record location: {{LINK}}
 - [ ] Every figure traced to a source and re-checked by the client
 - [ ] Contract check: MSA clause 7 (confidentiality), clause 15.6 (publicity), NDA terms, any client AI or media policy
 - [ ] No security details that could help an attacker (hosts, versions, specific vulnerabilities, credentials, configurations)

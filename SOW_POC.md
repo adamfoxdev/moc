@@ -123,13 +123,22 @@ If access or data is not ready on day 1, the start date moves and the schedule s
 - AI services are configured so that Client data is not used to train provider models (MSA clause 9.1). Approved tools for this PoC: {{e.g. Azure OpenAI / Foundry in the specified tenant, GitHub Copilot with training disabled, Claude Code with data retention disabled}}.
 - No security testing of Client systems is included without separate written authorisation.
 
-## 10. Intellectual property
+## 10. Intellectual property and publicity
 
 IP follows MSA clause 6. For this PoC:
 
 - Client Materials remain Client's. 
 - PoC code is assigned to Client on payment, excluding Northbound Consultant Tools.
 - {{Optional: Northbound may reuse generic, non-client-specific learnings and tooling.}}
+
+**Publicity (MSA clause 15.6).** *Client selects one; if none is ticked, no publicity applies.*
+
+- [ ] **Level 1, no publicity.** Northbound will not name Client or describe this engagement.
+- [ ] **Level 2, reference use.** Northbound may name Client and show its logo in customer lists and confidential proposals, and act as a reference.
+- [ ] **Level 3, case study.** As level 2, and Northbound may prepare a case study, published only after Client approves the final text, figures and quotes in writing.
+- [ ] **Anonymised use only.** Northbound may describe the engagement without identifying Client.
+
+Client's approver for publicity: {{NAME, TITLE, EMAIL}}. Consent may be withdrawn on {{30}} days' notice, as set out in the MSA.
 
 ## 11. Next steps and acceptance
 

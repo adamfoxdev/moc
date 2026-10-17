@@ -175,7 +175,27 @@ If the parties agree on a support subscription, the SOW will specify covered app
 
 15.5 **Notices.** Notices must be in writing and sent to the addresses above (or as updated by notice) by courier or email with confirmation of receipt. Email is valid for operational notices; legal notices of breach or termination require courier or registered email.
 
-15.6 **Publicity.** Neither party will use the other's name or logo publicly without written consent. Consultant may list Client as a customer only with prior consent.
+15.6 **Publicity.**
+
+(a) *Default.* Neither party will use the other's name, logo or trademarks, or state publicly that the other is a customer or supplier, without the other's prior written consent. This applies to websites, social media, proposals, decks, press and awards.
+
+(b) *Consent in a SOW.* A SOW may record Client's consent at one of these levels, and if it does not, level 1 applies:
+
+1. **No publicity.** No use of Client's name or the existence of the engagement.
+2. **Reference use.** Consultant may name Client and show its logo in customer lists and in confidential proposals to prospects, and may act as a reference on request.
+3. **Case study.** In addition to level 2, Consultant may prepare a case study about the engagement, which is published only after Client has approved the final text, figures, quotations and images in writing (c) below.
+
+(c) *Approval before publication.* Even where level 3 applies, Consultant will not publish a case study, testimonial or quotation until Client (and any individual quoted) has approved the specific text in writing. Client will respond within {{10}} business days; silence is not approval. Every figure published must be one that Consultant can show came from the engagement or from Client's data, and be approved by Client.
+
+(d) *Limits.* No consent allows Consultant to publish Client's Confidential Information, Client Data, security details, the identity of Client's own customers or personnel (other than a person who has approved being quoted), or any statement implying that Client endorses Consultant's services beyond what Client has approved. Consent is also not consent to describe a third party's product or service in a way that implies that party's endorsement.
+
+(e) *Anonymised use.* Consultant may describe the engagement in a way that does not identify Client or any individual, and does not disclose Confidential Information, where Client has agreed (level 3, or in writing).
+
+(f) *Withdrawal.* Client may withdraw consent at any time on {{30}} days' written notice. Consultant will then stop new use and remove the name, logo and published case study from its website and social channels it controls within that period. Withdrawal does not require recall of material already distributed in print or sent to third parties, but Consultant will not redistribute it.
+
+(g) *Client's use of Consultant's name.* Client may state truthfully that Consultant performed services for it, but will not use Consultant's name or logo in marketing, or imply Consultant's endorsement, without Consultant's written consent.
+
+(h) *Survival.* This clause survives termination or expiry of the Agreement for as long as published material remains in use.
 
 15.7 **Compliance.** Each party will comply with applicable anti-bribery, sanctions and export-control laws. Client will not use the Services in breach of such laws.
 
@@ -216,7 +236,8 @@ If the parties agree on a support subscription, the SOW will specify covered app
 10. **Support and warranty overrides (if any):** {{TEXT}}
 11. **Data in scope and security requirements:** {{TEXT}}
 12. **Acceptance review period (if not 10 business days):** {{DAYS}}
-13. **Signatures:** {{BOTH PARTIES}}
+13. **Publicity consent (MSA clause 15.6):** {{Level 1 No publicity / Level 2 Reference use / Level 3 Case study}}; permitted elements: {{name / logo / quote / figures}}; Client approver: {{NAME, TITLE}}
+14. **Signatures:** {{BOTH PARTIES}}
 
 ## Schedule 2: Rate card
 
