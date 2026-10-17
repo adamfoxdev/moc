@@ -57,6 +57,7 @@ The "Get started" buttons on the site (header, hero, contact) lead to the onboar
 | `SOW_POC.md` | Statement of work for the 1-week PoC |
 | `DPA.md` | Data processing agreement (when personal data is processed) |
 | `AI_POLICY.md` | Internal AI acceptable-use and tooling policy |
+| `AZURE_DEPLOYMENT_PLAN.md` | Plan for hosting the site and platform on Azure: architecture, code changes needed, environments, security, operations, rollout and go-live checklist |
 | `PRIVACY_NOTICE.md` | Draft privacy notice (public text, notes and questions for counsel, product gaps). The platform's `/privacy` page is generated from it |
 | `CASE_STUDY_TEMPLATE.md` | Case study template, interview guide and publication approval checklist |
 

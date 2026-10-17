@@ -102,6 +102,10 @@ Setup: copy `.env.example` to `.env`, then `node --env-file=.env server/index.js
 - Security headers (`nosniff`, frame denial, same-origin referrer).
 - The form asks people not to send passwords, keys or customer data.
 
+## Deploying
+
+See `../AZURE_DEPLOYMENT_PLAN.md`. The short version: the SQLite file must be replaced by Azure SQL before production, and run a single instance until the email worker has a lease. The deployment package must include `web/src/privacy-notice.md`, which `server/notice.js` reads at runtime.
+
 ## Known limits (deliberate, for a first version)
 
 - **Single admin token**, not named users. Next step: Entra ID sign-in for staff.
