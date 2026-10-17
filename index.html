@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Northbound — From Vibe-Coded Prototype to Production</title>
+<meta name="description" content="25 years of global IT consulting. We take vibe-coded PoCs and MVPs to secure, supported production on the Microsoft stack, and add AI to the systems you already run.">
+<style>
+:root{
+  --bg:#0b1020; --bg2:#121a33; --card:#161f3d; --line:#26325a;
+  --text:#e8ecf8; --muted:#9aa6c9; --accent:#4cc9a7; --accent2:#6ea8ff;
+}
+@media (prefers-color-scheme: light){
+  :root{--bg:#f7f8fc;--bg2:#eef1fa;--card:#fff;--line:#d9dfef;--text:#12182e;--muted:#52608a;--accent:#0f9d78;--accent2:#2b63d9}
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:inherit}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+header{position:sticky;top:0;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);z-index:5}
+nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+.logo{font-weight:700;letter-spacing:.02em;text-decoration:none}
+.logo span{color:var(--accent)}
+nav ul{display:flex;gap:22px;list-style:none;margin:0;padding:0;font-size:14px;color:var(--muted)}
+nav a{text-decoration:none}
+nav a:hover{color:var(--text)}
+.btn{display:inline-block;padding:12px 22px;border-radius:8px;background:var(--accent);color:#04120d;font-weight:600;text-decoration:none}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
+.hero{padding:96px 0 72px;background:radial-gradient(900px 400px at 80% -10%,color-mix(in srgb,var(--accent2) 22%,transparent),transparent)}
+.eyebrow{color:var(--accent);font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+h1{font-size:clamp(34px,6vw,60px);line-height:1.08;margin:14px 0 18px;max-width:16em}
+.lead{font-size:19px;color:var(--muted);max-width:40em}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+.stats{display:flex;gap:36px;flex-wrap:wrap;margin-top:48px;padding-top:28px;border-top:1px solid var(--line)}
+.stats b{display:block;font-size:30px}
+.stats small{color:var(--muted)}
+section{padding:72px 0}
+section.alt{background:var(--bg2)}
+h2{font-size:clamp(26px,4vw,36px);margin:0 0 10px}
+.sub{color:var(--muted);max-width:42em;margin:0 0 36px}
+.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px}
+.card h3{margin:0 0 8px;font-size:19px}
+.card p{margin:0;color:var(--muted);font-size:15px}
+.tag{display:inline-block;font-size:12px;color:var(--accent2);border:1px solid var(--line);border-radius:99px;padding:2px 10px;margin-bottom:12px}
+.steps{counter-reset:s;display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));padding:0;list-style:none;margin:0}
+.steps li{counter-increment:s;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+.steps li::before{content:counter(s);display:block;color:var(--accent);font-weight:700;font-size:22px}
+.steps b{display:block;margin:4px 0}
+.steps span{color:var(--muted);font-size:14px}
+.two{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+ul.ticks{padding-left:0;list-style:none;margin:12px 0 0}
+ul.ticks li{padding-left:24px;position:relative;margin:6px 0;color:var(--muted);font-size:15px}
+ul.ticks li::before{content:"✓";position:absolute;left:0;color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips span{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:6px 14px;font-size:14px;color:var(--muted)}
+footer{padding:48px 0;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+@media(max-width:720px){nav ul{display:none}.hero{padding-top:64px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <nav>
+      <a class="logo" href="#top">North<span>bound</span></a>
+      <ul>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#migration">Vibe Migration</a></li>
+        <li><a href="#poc">1-Week PoC</a></li>
+        <li><a href="#ai">AI Add-ons</a></li>
+        <li><a href="#engage">Engage</a></li>
+      </ul>
+      <a class="btn" href="#contact">Book a call</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+<div class="hero">
+  <div class="wrap">
+    <div class="eyebrow">IT consulting · est. on 25 years of delivery</div>
+    <h1>Your vibe-coded prototype works. Now make it production-grade.</h1>
+    <p class="lead">AI tools got you to a demo in a weekend. We get you from demo to secure, tested, monitored and supported — and we wire AI into the systems you already run.</p>
+    <div class="cta">
+      <a class="btn" href="#contact">Get a free migration assessment</a>
+      <a class="btn ghost" href="#services">See what we do</a>
+    </div>
+    <div class="stats">
+      <div><b>25 yrs</b><small>global industry experience</small></div>
+      <div><b>Multi-vertical</b><small>regulated and unregulated sectors</small></div>
+      <div><b>1 week</b><small>from idea to working PoC</small></div>
+    </div>
+  </div>
+</div>
+
+<section id="services">
+  <div class="wrap">
+    <h2>What we do</h2>
+    <p class="sub">Six ways to work with us, from a one-week experiment to a standing engineering partner.</p>
+    <div class="grid">
+      <div class="card"><span class="tag">Ongoing</span><h3>Consulting retainers</h3><p>A senior architect on call: roadmap reviews, design and code review, vendor and AI strategy, and an escalation point when production misbehaves.</p></div>
+      <div class="card"><span class="tag">Fixed scope</span><h3>1-week PoC</h3><p>A working proof of concept against your real data and constraints in five days, with a clear go / no-go and a path to production.</p></div>
+      <div class="card"><span class="tag">Build</span><h3>Application development</h3><p>Full-stack web, API and integration development on the Microsoft stack, built to be owned and maintained by your team.</p></div>
+      <div class="card"><span class="tag">Signature</span><h3>Vibe migration</h3><p>Take AI-generated prototypes and MVPs to production — guided by our consultants or done for you with our automated pipeline.</p></div>
+      <div class="card"><span class="tag">AI</span><h3>LLM add-ons</h3><p>Add copilots, search, summarization, extraction and agents to existing applications without a rewrite.</p></div>
+      <div class="card"><span class="tag">Platform</span><h3>Microsoft stack &amp; Foundry</h3><p>Azure, .NET, Entra ID, Power Platform, and Azure AI Foundry for governed model deployment, evaluation and agents.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="migration" class="alt">
+  <div class="wrap">
+    <h2>Vibe migration: prototype → production → supported</h2>
+    <p class="sub">Generated code is a great spec and a risky foundation. We keep what works, fix what doesn't, and hand you something your auditors and your on-call team can live with.</p>
+    <ol class="steps">
+      <li><b>Assess</b><span>Code, dependency, security and data-flow review. Fixed-fee report with risk ratings.</span></li>
+      <li><b>Harden</b><span>Auth, secrets, input validation, dependency cleanup, data model and error handling.</span></li>
+      <li><b>Test</b><span>Characterization tests around existing behavior, then CI gates for every change.</span></li>
+      <li><b>Deploy</b><span>Infrastructure as code, environments, pipelines, observability and backups.</span></li>
+      <li><b>Support</b><span>SLAs, runbooks and a named team for incidents, upgrades and new features.</span></li>
+    </ol>
+    <div class="two" style="margin-top:28px">
+      <div class="card">
+        <h3>Consulted migration</h3>
+        <p>We work alongside your team, coach them through the changes and leave you self-sufficient.</p>
+        <ul class="ticks"><li>Best when you have in-house engineers</li><li>Architecture and code review plus pair delivery</li><li>Knowledge transfer included</li></ul>
+      </div>
+      <div class="card">
+        <h3>Automatic migration</h3>
+        <p>You hand over the repo; our tooling and engineers return a hardened, tested, deployed service.</p>
+        <ul class="ticks"><li>Best when you have no engineering team</li><li>Automated analysis and refactoring, human-reviewed</li><li>Optional managed support afterward</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="poc">
+  <div class="wrap">
+    <h2>The one-week PoC</h2>
+    <p class="sub">Fixed price, fixed time. You see something real before committing to a build.</p>
+    <ol class="steps">
+      <li><b>Day 1</b><span>Frame the problem, success criteria and data access.</span></li>
+      <li><b>Days 2–4</b><span>Build the thinnest slice that proves the risky part.</span></li>
+      <li><b>Day 5</b><span>Demo, findings, effort estimate and production plan.</span></li>
+    </ol>
+  </div>
+</section>
+
+<section id="ai" class="alt">
+  <div class="wrap">
+    <h2>AI inside the infrastructure you already have</h2>
+    <p class="sub">No rip-and-replace. We add LLM capability next to your existing apps, data and identity, with evaluation and guardrails from day one.</p>
+    <div class="grid">
+      <div class="card"><h3>Copilots &amp; chat</h3><p>Grounded in your documents and data, respecting existing permissions.</p></div>
+      <div class="card"><h3>Document &amp; data extraction</h3><p>Invoices, contracts, emails and forms turned into structured records.</p></div>
+      <div class="card"><h3>Agents &amp; workflows</h3><p>Tool-using agents that call your APIs, with human approval where it matters.</p></div>
+      <div class="card"><h3>Governance</h3><p>Evaluation suites, content filtering, cost controls, logging and audit trails.</p></div>
+    </div>
+    <h3 style="margin-top:36px">Our stack</h3>
+    <div class="chips">
+      <span>Azure AI Foundry</span><span>Azure OpenAI</span><span>.NET / C#</span><span>Azure App Service &amp; Functions</span><span>AKS</span><span>Azure SQL &amp; Cosmos DB</span><span>Entra ID</span><span>Azure DevOps &amp; GitHub Actions</span><span>Power Platform</span><span>Microsoft 365 / Graph</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>25 years, every kind of environment</h2>
+    <p class="sub">We have shipped and supported systems across financial services, healthcare, retail, manufacturing, public sector, logistics and technology, in many regions. That experience is why we know which shortcuts in a prototype will hurt later.</p>
+  </div>
+</section>
+
+<section id="engage" class="alt">
+  <div class="wrap">
+    <h2>How to engage</h2>
+    <div class="grid" style="margin-top:24px">
+      <div class="card"><h3>Start small</h3><p>Free assessment call, then a 1-week PoC or a fixed-fee migration assessment.</p></div>
+      <div class="card"><h3>Project</h3><p>Fixed-scope migration or build with milestones and acceptance criteria.</p></div>
+      <div class="card"><h3>Retainer</h3><p>Monthly block of senior time plus optional production support with SLAs.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="wrap">
+    <h2>Have a prototype that needs to grow up?</h2>
+    <p class="sub">Tell us what you built and what tool you built it with. We reply within one business day.</p>
+    <a class="btn" href="mailto:hello@example.com?subject=Migration%20assessment">hello@example.com</a>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">© <span id="y"></span> Northbound Consulting. Placeholder name and contact details — replace before launch.</div>
+</footer>
+<script>document.getElementById('y').textContent=new Date().getFullYear()</script>
+</body>
+</html>
