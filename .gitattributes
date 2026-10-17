@@ -1,0 +1,5 @@
+# Scripts and container files must keep Unix line endings, even when checked out on Windows.
+*.sh text eol=lf
+Dockerfile text eol=lf
+litestream.yml text eol=lf
+nginx.conf text eol=lf

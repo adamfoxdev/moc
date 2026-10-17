@@ -32,6 +32,10 @@ COPY --from=build /app/dist ./dist
 COPY --from=build /app/web/src/privacy-notice.md ./web/src/privacy-notice.md
 COPY litestream.yml /etc/litestream.yml
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+# Windows checkouts turn line endings into CRLF, which makes Linux report the script as "not found"
+# (it looks for an interpreter called "sh\r"), and can also drop the executable bit. Fix both here so
+# the image works however the files were checked out.
+RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh && chmod +x /usr/local/bin/docker-entrypoint.sh
 
 EXPOSE 8080
 ENTRYPOINT ["docker-entrypoint.sh"]
