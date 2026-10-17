@@ -29,7 +29,7 @@ const server = app.listen(port, () => {
   console.log(`Northbound onboarding API on http://localhost:${port}`);
   if (authConfig) console.log(`Admin: staff sign-in via ${authConfig.issuer} (${authConfig.allowedEmails.size} allowed address${authConfig.allowedEmails.size === 1 ? '' : 'es'})`);
   else if (process.env.ADMIN_TOKEN) console.log('Admin: shared ADMIN_TOKEN (set OIDC_* and ADMIN_EMAILS for staff sign-in)');
-  else console.log('Admin is disabled: set OIDC_* and ADMIN_EMAILS, or ADMIN_TOKEN.');
+  else console.log('Admin is DISABLED: no staff sign-in or ADMIN_TOKEN settings were found. Put them in platform/.env (next to package.json) and restart; the npm scripts load that file automatically.');
   console.log(mailConfig.transport === 'log' ? 'Email: log only (nothing is sent; set MAIL_TRANSPORT=resend, postmark or smtp)' : `Email: sending via ${mailConfig.transport}${mailConfig.transport === 'smtp' ? ` (${mailConfig.smtp.host})` : ''}`);
   if (!mailConfig.notifyTo.length) console.log('NOTIFY_TO is not set: the team will not be emailed about new requests.');
 });

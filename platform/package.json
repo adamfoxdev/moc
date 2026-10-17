@@ -7,12 +7,12 @@
     "node": ">=22.13"
   },
   "scripts": {
-    "dev": "concurrently -k -n api,web \"node --watch --disable-warning=ExperimentalWarning server/index.js\" \"vite\"",
+    "dev": "concurrently -k -n api,web \"node --watch --disable-warning=ExperimentalWarning --env-file-if-exists=.env server/index.js\" \"vite\"",
     "build": "vite build",
-    "start": "NODE_ENV=production node --disable-warning=ExperimentalWarning server/index.js",
+    "start": "NODE_ENV=production node --disable-warning=ExperimentalWarning --env-file-if-exists=.env server/index.js",
     "test": "node --disable-warning=ExperimentalWarning --test \"server/**/*.test.js\"",
     "sync:privacy": "node scripts/sync-privacy.mjs",
-    "check:auth": "node --env-file=.env scripts/check-auth.mjs",
+    "check:auth": "node --env-file-if-exists=.env scripts/check-auth.mjs",
     "prebuild": "node scripts/sync-privacy.mjs"
   },
   "dependencies": {

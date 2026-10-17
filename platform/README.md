@@ -86,7 +86,7 @@ How it is built:
 - **Abuse limits.** The confirmation is only ever sent to the address on the form, and at most twice per address per day, so the form can't be used to mail-bomb someone. Names and text are escaped in HTML and kept out of headers.
 - **Sender.** `From` is always `MAIL_FROM`. We never put the customer's address in From.
 
-Setup: copy `.env.example` to `.env`, then `node --env-file=.env server/index.js`. By default `MAIL_TRANSPORT=log` prints emails to the console and sends nothing (development only: production refuses to start with it). For real sending set `MAIL_TRANSPORT` to `resend` or `postmark` (HTTPS APIs, which work on Fly.io where outbound SMTP is restricted) with `MAIL_API_KEY` and `MAIL_FROM`, or to `smtp` with `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`. Half-configured settings stop the server at startup with a clear message. Use a sending domain with SPF, DKIM and DMARC set up, or confirmations will land in spam.
+Setup: copy `.env.example` to `.env` (in this folder, next to `package.json`). `npm run dev`, `npm start` and `npm run check:auth` load it automatically; **restart after changing it**. Variables already set in your shell take priority over the file. By default `MAIL_TRANSPORT=log` prints emails to the console and sends nothing (development only: production refuses to start with it). For real sending set `MAIL_TRANSPORT` to `resend` or `postmark` (HTTPS APIs, which work on Fly.io where outbound SMTP is restricted) with `MAIL_API_KEY` and `MAIL_FROM`, or to `smtp` with `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`. Half-configured settings stop the server at startup with a clear message. Use a sending domain with SPF, DKIM and DMARC set up, or confirmations will land in spam.
 
 ## Staff sign-in
 
