@@ -1,0 +1,62 @@
+{
+  "name": "Landing Gear",
+  "shortName": "Landing Gear",
+  "wordmark": [
+    "Landing ",
+    "Gear"
+  ],
+  "placeholder": true,
+  "focus": [
+    "production"
+  ],
+  "tagline": "Built it with AI? Get it ready for real customers.",
+  "layout": "banner",
+  "header": "left",
+  "scheme": "light",
+  "fonts": {
+    "body": "rounded",
+    "heading": "rounded"
+  },
+  "shape": {
+    "radius": 22,
+    "controlRadius": 14,
+    "buttons": "pill"
+  },
+  "weight": 800,
+  "tracking": "-0.02em",
+  "maxWidth": 1040,
+  "colors": {
+    "light": {
+      "bg": "#fffaf5",
+      "bg2": "#fff0e3",
+      "card": "#ffffff",
+      "line": "#f0d7c0",
+      "text": "#2a1740",
+      "muted": "#66537c",
+      "accent": "#7c3aed",
+      "accent2": "#b4380a",
+      "err": "#b91c1c",
+      "onAccent": "#ffffff"
+    }
+  },
+  "hero": {
+    "bg": "#6d28d9",
+    "bg2": "#be185d",
+    "fg": "#ffffff"
+  },
+  "copy": {
+    "eyebrow": "Built it with AI?",
+    "headline": "You built it. Let's get it ready for real customers.",
+    "lead": "Tell us about your app. We'll send back an honest read on what's solid, what's risky and what it would take to launch it properly.",
+    "points": [
+      "We work with apps built in Lovable, Bolt, Cursor, Replit and more.",
+      "Straight answers, in plain English.",
+      "No pitch, no pricing, nothing to sign."
+    ],
+    "submitLabel": "Check my app",
+    "goalLabel": "Tell us about your app",
+    "goalHint": "What it does, how it was built, and who uses it. Rough is great.",
+    "goalPlaceholder": "e.g. I built a booking app with an AI tool. 40 people use it, but I'm not sure it's safe or ready for more.",
+    "finePrint": "No pitch, no pricing, no budget questions. Please don't share passwords, keys or customer data."
+  }
+}

@@ -94,21 +94,25 @@ Setup: copy `.env.example` to `.env` (in this folder, next to `package.json`). `
 
 Each deployment serves one **brand**, chosen by the `BRAND` setting (default `northbound`). A brand is a small file in `brands/<id>.json` that sets the company name, colours, fonts, shapes, page layout and wording. The same image runs every brand, so a fix or feature lands everywhere at once; the data, backups and email of each deployment stay separate.
 
-| Brand file | Look |
-|---|---|
-| `northbound.json` | The original: adaptive light/dark, teal, split layout |
-| `brightline.json` | Light, violet to magenta banner, rounded type, pill buttons |
-| `oakridge.json` | Warm paper, serif headings, centred, formal copy, square corners |
-| `pulse.json` | Dark only, lime and magenta, monospace headings, form on the left |
-| `meridian.json` | Clean corporate blue, compact form-first page |
+| Brand file | Example name | Leads with | Look |
+|---|---|---|---|
+| `landing-gear.json` | Landing Gear | Vibe-coded apps to production | Light, violet-to-magenta banner, rounded type, pill buttons |
+| `steadfast.json` | Steadfast Systems | Support (then hosting) | Warm paper, serif headings, centred, formal copy, square corners |
+| `voltage.json` | Voltage AI | AI solutions | Dark only, lime and magenta, monospace headings, form on the left |
+| `steward.json` | Steward Data Group | Data management | Clean corporate blue, compact form-first page |
+| `anchorpoint.json` | Anchorpoint Cloud | Cloud and hosting (then support) | Adaptive light/dark, steel blue, split layout |
+| `northbound.json` | Northbound | All services | The original look. This is what the running site serves until you switch it |
 
 These are **placeholders**: rename them, or copy one and change it. A brand file only lists what it changes; everything else falls back to the defaults (the Northbound look).
+
+**The company behind the brands.** `brands/_company.json` holds the legal details of the company that operates every site (currently **Mock LLC**: confirm the exact registered name). Each brand inherits them, so you enter the address, state and so on once, and a brand can override any field. Each brand's privacy notice then reads "Mock LLC, operating as <brand>", and the footer says "<brand>, operated by Mock LLC". Files starting with `_` are settings, not brands.
 
 **What a brand controls**
 
 | Setting | Values |
 |---|---|
 | `name`, `shortName`, `wordmark` | Company name; short form used in emails and tags; the logo text (one or two parts, the second in the accent colour; put a trailing space in the first part if you want a gap) |
+| `focus` | The service lines the brand leads with, in priority order: `production`, `support`, `ai`, `data`, `hosting`. Their routes are shown first in the visitor's "first read" and are offered even when the request does not mention them. Empty means no preference |
 | `layout` | `split`, `split-reverse` (form on the left), `centered`, `banner` (colour band with the form overlapping), `minimal` |
 | `header` | `left` or `center` |
 | `scheme` | `auto` (follows the visitor's device), `light` or `dark` |
@@ -127,17 +131,22 @@ Brand files are checked on start-up (unknown fonts, bad colours, text containing
 
 **Review designs live (development only).** `npm run dev` turns on a design switcher (the `.env.dev` file sets `BRAND_PREVIEW=true`). A small panel at the bottom right lets you flip between all brands and all layouts instantly, without a restart or page reload. The choice is kept for your browser. In this mode brand files are re-read on every request, so edit `brands/pulse.json`, save, refresh, and the change appears. The switcher is **off everywhere else**, and production refuses to start with `BRAND_PREVIEW=true`. Preview only changes what you see: submissions and consent records still use the configured brand.
 
-**Running five sites.** One Fly app per brand, each with its own volume, backup bucket and secrets:
+**What the "first read" can suggest.** Production (an AI-built app to production, a one-week proof of concept, building properly), AI solutions, data management, cloud and hosting, ongoing support, and senior advice. It reads the visitor's words and answers, and each brand's `focus` puts its own line first. No prices are ever shown. `server/recommend.js` is where the routes are written.
+
+**Deploying all five (and the general site) to Fly.** One Fly app per brand, each with its own volume, backup bucket and secrets, all from the same image. `deploy/brands.json` lists the app name and address for each brand; edit the names there first (Fly app names are global, so `moc-voltage` may be taken).
 
 ```powershell
-npm run fly:config -- pulse moc-pulse https://pulse.example.com ams    # writes fly.pulse.toml
-fly apps create moc-pulse
-fly volumes create northbound_data --app moc-pulse --region ams --size 1
-fly storage create --app moc-pulse
-fly secrets set --app moc-pulse ...        # as for the first app, but see below
-fly deploy -c fly.pulse.toml --ha=false
+npm run fly -- plan                    # what would be deployed; changes nothing
+npm run fly -- init-secrets all        # creates .fly-secrets/ files to fill in (generates each brand's SESSION_SECRET)
+# edit .fly-secrets/_shared.env (Google sign-in, Resend key) and each <brand>.env (email addresses)
+npm run fly -- setup landing-gear      # creates the app, volume and backup bucket; stages the secrets (asks first)
+npm run fly -- deploy landing-gear     # deploys one machine, then checks /api/ready
+npm run fly -- status                  # machines and volumes for every app
+npm run fly -- urls                    # the sign-in addresses to register with Google
 ```
-Per brand: its own `SESSION_SECRET` (generate a new one each time), `MAIL_FROM` and `NOTIFY_TO` on that brand's own email domain, and its redirect URI (`https://<that site>/auth/callback`) added to Google. You can reuse the same Google OAuth client and `ADMIN_EMAILS` across all of them. See `../FLY_DEPLOYMENT_PLAN.md`, "Several brands".
+Use `all` instead of a brand name to do every brand in turn, `--dry-run` to see the commands without running them, and `--yes` to skip the "this can incur charges" question. Setup is safe to re-run (it leaves existing apps, volumes and buckets alone). Deploying several brands stops at the first one that fails to come up. The script never prints secret values, and `.fly-secrets/` and the generated `fly.<brand>.toml` files are not committed.
+
+Per brand, in `.fly-secrets/<brand>.env`: its own `MAIL_FROM` (on a domain verified at Resend), `MAIL_REPLY_TO`, `NOTIFY_TO` and `SESSION_SECRET`. Shared in `_shared.env`: the Google sign-in client, `ADMIN_EMAILS` and, if all the domains are in one Resend account, `MAIL_API_KEY`. Add each site's `/auth/callback` address (from `npm run fly -- urls`) to the Google client.
 
 ## Staff sign-in
 
@@ -217,7 +226,8 @@ See `../FLY_DEPLOYMENT_PLAN.md` for the full plan and first-deploy commands. In 
 | `Dockerfile` | Build the React app, then a slim Node runtime running as a non-root user (includes `brands/`) |
 | `docker-entrypoint.sh` | Fix volume ownership, restore from backup if the volume is empty, run the app under Litestream |
 | `litestream.yml` | Backup replica settings (Tigris, 7-day window) |
-| `fly.toml` | Fly app configuration |
+| `fly.toml` | Fly app configuration (the template for every brand) |
+| `deploy/brands.json`, `scripts/fly.mjs` | Which Fly app serves which brand, and the script that sets up and deploys them (`npm run fly`) |
 | `../site/` | Fly deployment of the marketing page |
 | `../.github/workflows/platform.yml` | Tests on every change, deploy from `main` |
 

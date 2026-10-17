@@ -192,18 +192,20 @@ Five sites with different company names and looks run from the **same image**. E
 | Privacy notice details (`legal` block in the brand file) and the legal entity behind the site | `PRIVACY_NOTICE.md`, the shared wording |
 | Custom domain and certificate | |
 
-**Steps for each extra brand** (the first app is already done):
+**Steps for each extra brand** (the first app, `moc-yytcxa`, is already done and is listed in `deploy/brands.json` as `northbound`):
 
-1. `npm run fly:config -- <brand> <app-name> <https url> <region>` writes `fly.<brand>.toml` (app name, `PUBLIC_URL`, `BRAND`, region). Commit these files so deploys are repeatable.
-2. Create the app, volume and bucket, set secrets, `fly deploy -c fly.<brand>.toml --ha=false` (the commands the script prints). **One machine per app.**
-3. Add `https://<site>/auth/callback` to the Google OAuth client; set `NOTIFY_TO` and `MAIL_FROM` for that brand; verify its email domain.
-4. Fill the brand's `legal` block so its privacy notice loses the draft banner, then redeploy.
+1. Edit the app names and addresses in `platform/deploy/brands.json` (Fly app names are global).
+2. `npm run fly -- init-secrets all`, then fill in `.fly-secrets/` (one shared file for Google sign-in and the Resend key, one small file per brand).
+3. `npm run fly -- setup <brand>` creates the app, volume and bucket and stages the secrets. It asks before creating anything and is safe to re-run.
+4. `npm run fly -- urls` lists the sign-in addresses to add to the Google client.
+5. `npm run fly -- deploy <brand>` deploys one machine and checks `/api/ready`. Do the first brand alone and look at it before using `all`.
+6. Fill the brand's `legal` block (or `_company.json` for all of them) so its privacy notice loses the draft banner, then redeploy.
 
-**Updating all five:** deploy each app with its own config: `fly deploy -c fly.<brand>.toml --ha=false` from `platform/`. A loop in PowerShell works, but deploy one first and check it before the rest. Do not put several brands on one Fly app: they would share one database.
+**Updating all of them:** `npm run fly -- deploy all` (or one brand), which regenerates each `fly.<brand>.toml`, deploys, and stops at the first brand that does not come up. Do not put several brands on one Fly app: they would share one database.
 
-**Costs and effort scale with the count:** five machines, five volumes, five buckets, five email domains, five privacy notices to keep accurate. Each brand's legal entity is the data controller for its own enquiries: confirm with counsel that this is how you want to structure it, and that the processing terms and notices name the right entity for each site.
+**Costs and effort scale with the count:** five machines, five volumes, five buckets, five email domains, five privacy notices to keep accurate. All five sites are operated by one company (`brands/_company.json`, currently Mock LLC), which is therefore the data controller for every site's enquiries and the party named in each privacy notice, while each brand is a trade name. Check with counsel: whether each trade name needs to be registered ("doing business as" filings), whether one company running five brands is the liability structure you want, and that contracts and notices name the company as well as the brand.
 
-**Not tested:** I have not deployed more than the first app, so the `fly deploy -c fly.<brand>.toml` path (that Fly finds the Dockerfile next to a config file with another name) is unconfirmed; if Fly can't find it, add `--dockerfile Dockerfile`. The brand switching itself is tested (69 automated tests, plus real-browser runs of all five brands with the Content-Security-Policy on).
+**Not tested against real Fly:** the deploy scripts were tested with a stand-in `fly` that records its commands (every step, ordering, masking of secrets, re-runs, refusals), not with a real account. Unconfirmed: the `fly storage create --name … --yes` flags, that `fly deploy -c fly.<brand>.toml` finds the Dockerfile beside a differently named config (if not, add `--dockerfile Dockerfile`), and that `fly secrets set --stage` works before the first deploy. Run `setup` and `deploy` for one brand first. The brand switching itself is tested (90 automated tests, plus real-browser runs of all five brands with the Content-Security-Policy on).
 
 ---
 

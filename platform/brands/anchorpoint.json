@@ -1,0 +1,76 @@
+{
+  "name": "Anchorpoint Cloud",
+  "shortName": "Anchorpoint",
+  "wordmark": [
+    "Anchor",
+    "point"
+  ],
+  "placeholder": true,
+  "focus": [
+    "hosting",
+    "support"
+  ],
+  "tagline": "Reliable cloud and hosting for the apps your business depends on.",
+  "layout": "split",
+  "header": "left",
+  "scheme": "auto",
+  "fonts": {
+    "body": "sans",
+    "heading": "sans"
+  },
+  "shape": {
+    "radius": 12,
+    "controlRadius": 8,
+    "buttons": "rounded",
+    "chips": "pill"
+  },
+  "weight": 700,
+  "tracking": "-0.01em",
+  "maxWidth": 1080,
+  "colors": {
+    "light": {
+      "bg": "#f4f8fb",
+      "bg2": "#e8f0f6",
+      "card": "#ffffff",
+      "line": "#cbd9e5",
+      "text": "#0f2233",
+      "muted": "#456078",
+      "accent": "#0a6a8f",
+      "accent2": "#0b5c9e",
+      "err": "#b3261e",
+      "onAccent": "#ffffff"
+    },
+    "dark": {
+      "bg": "#07141d",
+      "bg2": "#0d1f2c",
+      "card": "#0f2736",
+      "line": "#1f3b4e",
+      "text": "#e6f1f8",
+      "muted": "#9fb8c9",
+      "accent": "#4cc3ee",
+      "accent2": "#7fb8ff",
+      "err": "#ff8a8a",
+      "onAccent": "#04141d"
+    }
+  },
+  "hero": {
+    "bg": "#0a6a8f",
+    "bg2": "",
+    "fg": "#ffffff"
+  },
+  "copy": {
+    "eyebrow": "Cloud and hosting",
+    "headline": "Put your app somewhere reliable.",
+    "lead": "Tell us what you run and where it lives today. We'll look at hosting, backups, security and cost, and suggest a plan.",
+    "points": [
+      "Predictable hosting costs.",
+      "Backups and monitoring built in.",
+      "We work with what you already have."
+    ],
+    "submitLabel": "Review my hosting",
+    "goalLabel": "What do you run, and where?",
+    "goalHint": "The app, where it is hosted now, and what is not working.",
+    "goalPlaceholder": "e.g. Our app runs on a free tier and went down twice last month. We have no backups and no idea what it will cost as we grow.",
+    "finePrint": "No pitch, no pricing. Please don't share passwords, keys or customer data."
+  }
+}

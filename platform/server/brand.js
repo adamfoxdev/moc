@@ -18,6 +18,8 @@ export const FONT_STACKS = {
 export const LAYOUTS = ['split', 'split-reverse', 'centered', 'banner', 'minimal'];
 export const HEADERS = ['left', 'center'];
 export const SCHEMES = ['auto', 'light', 'dark'];
+// The service lines a brand can lead with (see recommend.js): they are shown first in the suggested routes.
+export const FOCUS = ['production', 'support', 'ai', 'data', 'hosting'];
 const COLOR_KEYS = ['bg', 'bg2', 'card', 'line', 'text', 'muted', 'accent', 'accent2', 'err', 'onAccent'];
 
 // What every brand starts from. A brand file only lists what it changes; "northbound" reproduces this exactly.
@@ -48,6 +50,7 @@ const DEFAULTS = {
     goalPlaceholder: "e.g. We built a booking tool with Lovable and 40 people use it. We want to make sure it's safe and can grow.",
     finePrint: "No pitch, no pricing and no budget questions. Please don't include passwords, keys or customer data.",
   },
+  focus: [],
   legal: {},
 };
 
@@ -88,6 +91,7 @@ export function brandProblems(b) {
     for (const t of Array.isArray(v) ? v : [v]) if (typeof t !== 'string' || !SAFE_TEXT.test(t)) p.push(`copy.${k} must be text without < > { }`);
   }
   if (!Array.isArray(b.copy?.points)) p.push('copy.points must be a list');
+  if (!Array.isArray(b.focus) || b.focus.some((f) => !FOCUS.includes(f))) p.push(`focus must be a list drawn from ${FOCUS.join(', ')}`);
   for (const [k, v] of Object.entries(b.legal || {})) if (typeof v !== 'string' || !SAFE_TEXT.test(v)) p.push(`legal.${k} must be text without < > { }`);
   if (b.wordmark && (!Array.isArray(b.wordmark) || b.wordmark.length > 2 || b.wordmark.some((x) => typeof x !== 'string' || !SAFE_TEXT.test(x)))) p.push('wordmark must be one or two text parts');
   return p;
@@ -95,8 +99,15 @@ export function brandProblems(b) {
 
 const expand = (s, b) => (typeof s === 'string' ? s.replaceAll('{name}', b.name).replaceAll('{shortName}', b.shortName) : s);
 
+// Files starting with "_" are shared settings, not brands.
 export function listBrands(dir = BRANDS_DIR) {
-  return existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith('.json')).map((f) => f.slice(0, -5)).sort() : [];
+  return existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith('.json') && !f.startsWith('_')).map((f) => f.slice(0, -5)).sort() : [];
+}
+
+/** The company behind every brand (brands/_company.json): its legal details are the default for each brand's "legal" block. */
+export function loadCompany(dir = BRANDS_DIR) {
+  const file = join(dir, '_company.json');
+  return existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {};
 }
 
 /** Load and validate one brand by id. Throws with every problem listed. */
@@ -105,7 +116,8 @@ export function loadBrand(id = 'northbound', dir = BRANDS_DIR) {
   const file = join(dir, `${id}.json`);
   if (!existsSync(file)) throw new Error(`Unknown BRAND "${id}". Available brands: ${listBrands(dir).join(', ') || '(none found)'}`);
   const raw = JSON.parse(readFileSync(file, 'utf8'));
-  const b = merge(clone(DEFAULTS), { ...raw, id });
+  // The company's legal details apply to every brand unless the brand's own file says otherwise.
+  const b = merge(clone(DEFAULTS), { ...raw, id, legal: { ...loadCompany(dir).legal, ...raw.legal } });
   b.shortName = b.shortName || b.name;
   b.wordmark = b.wordmark || [b.name];
   // Expand {name} and {shortName} first, so anything else in curly braces is still rejected.
@@ -127,7 +139,7 @@ export function publicBrand(b) {
     layout: b.layout,
     header: b.header,
     placeholder: !!b.placeholder,
-    footer: b.legal?.legalName || b.name,
+    footer: b.legal?.legalName && b.legal.legalName !== b.name ? `${b.name}, operated by ${b.legal.legalName}` : b.name,
     copy: b.copy,
   };
 }

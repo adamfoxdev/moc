@@ -1,0 +1,64 @@
+{
+  "name": "Steadfast Systems",
+  "shortName": "Steadfast",
+  "wordmark": [
+    "Steadfast ",
+    "Systems"
+  ],
+  "placeholder": true,
+  "focus": [
+    "support",
+    "hosting"
+  ],
+  "tagline": "Dependable support for the systems your business runs on.",
+  "layout": "centered",
+  "header": "center",
+  "scheme": "light",
+  "fonts": {
+    "body": "humanist",
+    "heading": "serif"
+  },
+  "shape": {
+    "radius": 4,
+    "controlRadius": 3,
+    "buttons": "rounded",
+    "chips": "square"
+  },
+  "weight": 600,
+  "tracking": "0",
+  "maxWidth": 960,
+  "colors": {
+    "light": {
+      "bg": "#f6f1e7",
+      "bg2": "#ece4d3",
+      "card": "#fbf8f1",
+      "line": "#d3c7ad",
+      "text": "#1f2a1f",
+      "muted": "#505b4b",
+      "accent": "#1f4d3a",
+      "accent2": "#7a4f00",
+      "err": "#9b1c1c",
+      "onAccent": "#f6f1e7"
+    }
+  },
+  "hero": {
+    "bg": "#1f4d3a",
+    "bg2": "",
+    "fg": "#f6f1e7"
+  },
+  "copy": {
+    "eyebrow": "Dependable support",
+    "headline": "Keep your systems running, with people who know them.",
+    "lead": "Tell us what you run and what worries you about it. A senior engineer at {name} reads every enquiry and replies personally.",
+    "points": [
+      "Named engineers, not a ticket queue.",
+      "Support for systems we built, and ones we did not.",
+      "There is no obligation to enquire."
+    ],
+    "submitLabel": "Request support",
+    "goalLabel": "What do you need looked after?",
+    "goalHint": "The system, what it does for you, and what concerns you.",
+    "goalPlaceholder": "e.g. Our customer portal is business-critical. The developer who built it has left, and when it goes down nobody knows what to do.",
+    "finePrint": "We ask that you do not include passwords, keys or customer data in your enquiry."
+  }
+}

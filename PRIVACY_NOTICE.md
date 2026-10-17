@@ -15,7 +15,7 @@
 <!-- PUBLIC-NOTICE:START -->
 # Privacy Notice
 
-**{{NORTHBOUND_LEGAL_NAME}}** ("**Northbound**", "**we**", "**us**")
+**{{NORTHBOUND_LEGAL_NAME}}**, operating as **Northbound** ("**we**", "**us**")
 Last updated: {{DATE}}
 
 ## The short version

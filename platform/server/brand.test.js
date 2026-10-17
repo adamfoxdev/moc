@@ -19,11 +19,14 @@ const lum = (hex) => {
 };
 const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
 
-test('there are five brands and each one loads, validates and is distinct', () => {
-  assert.deepEqual(ids, ['brightline', 'meridian', 'northbound', 'oakridge', 'pulse']);
+test('there are five service brands plus the general one, and each loads, validates and is distinct', () => {
+  assert.deepEqual(ids, ['anchorpoint', 'landing-gear', 'northbound', 'steadfast', 'steward', 'voltage']);
   const brands = ids.map((id) => loadBrand(id));
-  assert.equal(new Set(brands.map((b) => b.name)).size, 5);
-  assert.equal(new Set(brands.map((b) => b.layout)).size, 5, 'each brand uses a different layout');
+  assert.equal(new Set(brands.map((b) => b.name)).size, 6);
+  assert.equal(new Set(brands.map((b) => b.colors[b.scheme === 'dark' ? 'dark' : 'light'].accent)).size, 6, 'every brand has its own accent colour');
+  const services = brands.filter((b) => b.id !== 'northbound');
+  assert.equal(new Set(services.map((b) => b.layout)).size, 5, 'the five service brands use five different layouts');
+  assert.deepEqual(services.map((b) => b.focus[0]).sort(), ['ai', 'data', 'hosting', 'production', 'support']);
   for (const b of brands) assert.deepEqual(brandProblems(b), [], b.id);
 });
 
@@ -76,9 +79,27 @@ test('a brand file only needs to list what it changes', () => {
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
+test('the company behind the brands supplies the default legal details, and a brand can override them', () => {
+  for (const id of ids) {
+    const b = loadBrand(id);
+    assert.equal(b.legal.legalName, 'Mock LLC', id);
+    assert.equal(b.legal.entityType, 'limited liability company', id);
+  }
+  assert.equal(publicBrand(loadBrand('voltage')).footer, 'Voltage AI, operated by Mock LLC');
+  const dir = mkdtempSync(join(tmpdir(), 'brands-'));
+  try {
+    writeFileSync(join(dir, '_company.json'), JSON.stringify({ legal: { legalName: 'Parent Co', address: '1 Main St' } }));
+    writeFileSync(join(dir, 'alpha.json'), JSON.stringify({ name: 'Alpha' }));
+    writeFileSync(join(dir, 'beta.json'), JSON.stringify({ name: 'Beta', legal: { address: '2 Side St', privacyEmail: 'privacy@beta.test' } }));
+    assert.deepEqual(listBrands(dir), ['alpha', 'beta'], '_company.json is not a brand');
+    assert.equal(loadBrand('alpha', dir).legal.address, '1 Main St');
+    assert.deepEqual(loadBrand('beta', dir).legal, { legalName: 'Parent Co', address: '2 Side St', privacyEmail: 'privacy@beta.test' });
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('copy placeholders expand to the brand name', () => {
-  assert.match(loadBrand('brightline').copy.lead, /how Brightline can help/);
-  assert.match(loadBrand('oakridge').copy.lead, /A partner at Oakridge Advisory reads/);
+  assert.match(loadBrand('steadfast').copy.lead, /A senior engineer at Steadfast Systems reads/);
+  assert.match(loadBrand('steward').copy.lead, /reply from the Steward team/);
 });
 
 test('css: only system fonts, fixed or adaptive colour scheme, and outranks the base stylesheet', () => {
@@ -91,46 +112,47 @@ test('css: only system fonts, fixed or adaptive colour scheme, and outranks the 
     if (b.scheme === 'auto') assert.match(css, /@media \(prefers-color-scheme:dark\)/);
     else assert.doesNotMatch(css, /@media/);
   }
-  assert.match(brandCss(loadBrand('pulse')), /color-scheme:dark;/);
-  assert.match(brandCss(loadBrand('brightline')), /--btn-radius:999px/);
-  assert.match(brandCss(loadBrand('brightline')), /--hero-bg:linear-gradient/);
+  assert.match(brandCss(loadBrand('voltage')), /color-scheme:dark;/);
+  assert.match(brandCss(loadBrand('landing-gear')), /--btn-radius:999px/);
+  assert.match(brandCss(loadBrand('landing-gear')), /--hero-bg:linear-gradient/);
 });
 
 test('favicon: the initial on the accent colour, with text escaped', () => {
-  const svg = faviconSvg(loadBrand('pulse'));
+  const svg = faviconSvg(loadBrand('voltage'));
   assert.match(svg, /fill="#c6ff3d"/);
-  assert.match(svg, />P<\/text>/);
+  assert.match(svg, />V<\/text>/);
 });
 
 test('privacy notice: brand name replaces Northbound; legal details fill their placeholders; the fingerprint differs per brand', () => {
-  const a = renderNotice(loadBrand('oakridge'));
+  const a = renderNotice(loadBrand('steadfast'));
   assert.doesNotMatch(a.markdown, /Northbound/);
-  assert.match(a.markdown, /Oakridge Advisory/);
+  assert.match(a.markdown, /Steadfast Systems/);
+  assert.match(a.markdown, /\*\*Mock LLC\*\*, operating as \*\*Steadfast Systems\*\*/, 'the company operates the brand');
   assert.equal(a.draft, true, 'placeholders remain until the legal details are supplied');
 
-  const b = loadBrand('oakridge');
-  b.legal = { legalName: 'Oakridge Advisory Ltd', entityType: 'limited company', jurisdiction: 'England and Wales', regNo: '01234567', address: '1 High Street, Oakridge', privacyEmail: 'privacy@oakridge.test', region: 'Amsterdam (EU)', lastUpdated: '1 November 2026', retention: '12 months', logRetention: '30 days' };
+  const b = loadBrand('steadfast');
+  b.legal = { legalName: 'Steadfast Systems Inc', entityType: 'limited company', jurisdiction: 'England and Wales', regNo: '01234567', address: '1 High Street, Steadfast', privacyEmail: 'privacy@steadfast.test', region: 'Amsterdam (EU)', lastUpdated: '1 November 2026', retention: '12 months', logRetention: '30 days' };
   const filled = renderNotice(b);
-  assert.match(filled.markdown, /\*\*Oakridge Advisory Ltd\*\*/);
-  assert.match(filled.markdown, /privacy@oakridge\.test/);
+  assert.match(filled.markdown, /\*\*Steadfast Systems Inc\*\*/);
+  assert.match(filled.markdown, /privacy@steadfast\.test/);
   assert.match(filled.markdown, /Amsterdam \(EU\)/);
   assert.notEqual(filled.version, a.version);
-  assert.notEqual(renderNotice(loadBrand('pulse')).version, a.version);
+  assert.notEqual(renderNotice(loadBrand('voltage')).version, a.version);
 });
 
 test('emails: use the brand name, and team alerts are tagged with the brand', () => {
   const answers = { goal: 'A goal long enough to count', name: 'Sam', email: 'sam@example.com' };
   const r = { id: 'NB-TEST22', name: 'Sam', email: 'sam@example.com', company: '', goal: answers.goal, answers, recommendation: recommend(answers), createdAt: '2026-01-01T00:00:00.000Z' };
-  const brand = loadBrand('brightline');
+  const brand = loadBrand('landing-gear');
   const c = renderEmail('confirmation', r, { brand });
-  assert.match(c.text, /A person at Brightline Labs will read/);
+  assert.match(c.text, /A person at Landing Gear will read/);
   assert.doesNotMatch(c.text + c.html, /Northbound/);
-  assert.match(renderEmail('team-new', r, { brand }).subject, /^\[Brightline\] New request NB-TEST22/);
+  assert.match(renderEmail('team-new', r, { brand }).subject, /^\[Landing Gear\] New request NB-TEST22/);
   assert.match(renderEmail('team-new', r, {}).subject, /^New request/, 'still works without a brand');
 });
 
 test('API: each deployment serves its own brand, stylesheet, favicon and notice', async () => {
-  for (const id of ['brightline', 'pulse']) {
+  for (const id of ['landing-gear', 'voltage']) {
     const store = createStore(':memory:');
     const app = createApp({ store, serveStatic: false, brand: loadBrand(id), authConfig: null });
     const server = await new Promise((r) => { const s = app.listen(0, () => { s.unref(); r(s); }); });

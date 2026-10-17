@@ -14,7 +14,8 @@
     "sync:privacy": "node scripts/sync-privacy.mjs",
     "check:auth": "node --env-file-if-exists=.env scripts/check-auth.mjs",
     "prebuild": "node scripts/sync-privacy.mjs",
-    "fly:config": "node scripts/fly-config.mjs"
+    "fly:config": "node scripts/fly-config.mjs",
+    "fly": "node scripts/fly.mjs"
   },
   "dependencies": {
     "express": "^5.3.0",

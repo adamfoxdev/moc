@@ -1,0 +1,63 @@
+{
+  "name": "Voltage AI",
+  "shortName": "Voltage",
+  "wordmark": [
+    "Voltage",
+    ".ai"
+  ],
+  "placeholder": true,
+  "focus": [
+    "ai"
+  ],
+  "tagline": "Put AI to work inside the systems you already run.",
+  "layout": "split-reverse",
+  "header": "left",
+  "scheme": "dark",
+  "fonts": {
+    "body": "sans",
+    "heading": "mono"
+  },
+  "shape": {
+    "radius": 10,
+    "controlRadius": 6,
+    "buttons": "rounded",
+    "chips": "square"
+  },
+  "weight": 700,
+  "tracking": "-0.03em",
+  "maxWidth": 1120,
+  "colors": {
+    "dark": {
+      "bg": "#08080d",
+      "bg2": "#13131b",
+      "card": "#0f0f17",
+      "line": "#2b2b3c",
+      "text": "#f2f2f7",
+      "muted": "#a3a3b8",
+      "accent": "#c6ff3d",
+      "accent2": "#ff5ce1",
+      "err": "#ff7a7a",
+      "onAccent": "#08080d"
+    }
+  },
+  "hero": {
+    "bg": "#c6ff3d",
+    "bg2": "",
+    "fg": "#08080d"
+  },
+  "copy": {
+    "eyebrow": "// ai that ships",
+    "headline": "Put AI to work inside what you already run.",
+    "lead": "Tell us the task you'd love to hand to AI. Get a first read on what's possible, what it needs, and how to do it safely.",
+    "points": [
+      "Built into your existing apps and data.",
+      "Measured, guarded and under your control.",
+      "No hype, no gatekeepers."
+    ],
+    "submitLabel": "Scope my AI",
+    "goalLabel": "What should AI do for you?",
+    "goalHint": "The task, the system it touches, and what good looks like.",
+    "goalPlaceholder": "e.g. Our support team answers the same 50 questions all day. We'd like an assistant that uses our docs and hands off to a human.",
+    "finePrint": "No pitch, no pricing. Don't paste passwords, keys or customer data."
+  }
+}

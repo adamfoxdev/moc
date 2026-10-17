@@ -2,7 +2,7 @@ export const OPTIONS = {
   stage: ['idea', 'prototype', 'mvp', 'live', 'existing'],
   builtWith: ['ai-tools', 'in-house', 'agency', 'low-code', 'not-sure'],
   team: ['none', 'some', 'strong'],
-  helpWith: ['production', 'poc', 'ai', 'build', 'advice', 'microsoft', 'unsure'],
+  helpWith: ['production', 'poc', 'ai', 'build', 'data', 'hosting', 'support', 'advice', 'microsoft', 'unsure'],
   users: ['few', 'tens', 'hundreds', 'thousands', 'unknown'],
   data: ['none', 'business', 'personal', 'regulated'],
   timing: ['flexible', 'quarter', 'urgent'],

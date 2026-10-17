@@ -133,7 +133,7 @@ export function createApp({
     }
     const { ok, errors, value } = validateAnswers(req.body, { requireCore: true });
     if (!ok) return res.status(400).json({ errors });
-    const recommendation = recommend(value);
+    const recommendation = recommend(value, { focus: brand.focus });
     const { id, editToken } = store.create(value, recommendation, { noticeVersion });
     safely(() => notifier?.requestCreated({ id, email: value.email }));
     res.status(201).json({ reference: id, editToken, recommendation });
@@ -150,7 +150,7 @@ export function createApp({
     const current = store.get(req.params.id);
     delete value.consent; // consent is given once, at creation
     const merged = { ...current.answers, ...value };
-    const recommendation = recommend(merged);
+    const recommendation = recommend(merged, { focus: brand.focus });
     store.updateAnswers(req.params.id, merged, recommendation);
     safely(() => notifier?.requestUpdated(req.params.id));
     res.json({ reference: req.params.id, recommendation });

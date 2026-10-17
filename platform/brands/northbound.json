@@ -1,5 +1,8 @@
 {
   "name": "Northbound",
-  "wordmark": ["North", "bound"],
+  "wordmark": [
+    "North",
+    "bound"
+  ],
   "placeholder": true
 }

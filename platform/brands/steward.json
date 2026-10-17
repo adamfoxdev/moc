@@ -1,0 +1,59 @@
+{
+  "name": "Steward Data Group",
+  "shortName": "Steward",
+  "wordmark": [
+    "Steward ",
+    "Data Group"
+  ],
+  "placeholder": true,
+  "focus": [
+    "data"
+  ],
+  "tagline": "Request a data consultation with Steward Data Group.",
+  "layout": "minimal",
+  "header": "left",
+  "scheme": "light",
+  "fonts": {
+    "body": "geometric",
+    "heading": "geometric"
+  },
+  "shape": {
+    "radius": 6,
+    "controlRadius": 6,
+    "buttons": "rounded",
+    "chips": "square"
+  },
+  "weight": 700,
+  "tracking": "-0.01em",
+  "maxWidth": 720,
+  "colors": {
+    "light": {
+      "bg": "#f3f6fb",
+      "bg2": "#e6edf7",
+      "card": "#ffffff",
+      "line": "#c9d5e6",
+      "text": "#0b1f3a",
+      "muted": "#46597a",
+      "accent": "#0b5fff",
+      "accent2": "#0a47b8",
+      "err": "#b42318",
+      "onAccent": "#ffffff"
+    }
+  },
+  "hero": {
+    "bg": "#0b5fff",
+    "bg2": "",
+    "fg": "#ffffff"
+  },
+  "copy": {
+    "eyebrow": "",
+    "headline": "Request a data consultation",
+    "lead": "Describe where your data lives and what you need from it. You will see an initial recommendation straight away, and a reply from the {shortName} team within one business day.",
+    "points": [],
+    "submitLabel": "Submit request",
+    "goalLabel": "Your data situation",
+    "goalHint": "Which systems and spreadsheets hold it, and what is going wrong.",
+    "goalPlaceholder": "e.g. Customer data sits in three systems and a dozen spreadsheets, and nobody trusts the totals.",
+    "finePrint": "Please do not include passwords, keys or customer data."
+  }
+}

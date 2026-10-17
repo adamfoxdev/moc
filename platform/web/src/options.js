@@ -22,8 +22,11 @@ export const HELP_WITH = [
   ['poc', 'Find out if an idea works, fast'],
   ['ai', 'Add AI to an existing application'],
   ['build', 'Build something properly'],
+  ['data', 'Organise and manage our data'],
+  ['hosting', 'Cloud and hosting'],
   ['microsoft', 'Work on the Microsoft stack or Azure AI Foundry'],
-  ['advice', 'Senior advice or ongoing support'],
+  ['support', 'Ongoing support once it is live'],
+  ['advice', 'Senior advice or a second opinion'],
   ['unsure', 'Not sure yet'],
 ];
 export const USERS = [
