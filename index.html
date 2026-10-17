@@ -55,6 +55,8 @@ ul.ticks li{padding-left:24px;position:relative;margin:6px 0;color:var(--muted);
 ul.ticks li::before{content:"✓";position:absolute;left:0;color:var(--accent)}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chips span{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:6px 14px;font-size:14px;color:var(--muted)}
+.price .amt{font-size:32px;font-weight:700;margin:2px 0 6px}
+.price .amt small{font-size:14px;font-weight:400;color:var(--muted);margin:0 4px}
 footer{padding:48px 0;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
 @media(max-width:720px){nav ul{display:none}.hero{padding-top:64px}}
 </style>
@@ -69,6 +71,7 @@ footer{padding:48px 0;border-top:1px solid var(--line);color:var(--muted);font-s
         <li><a href="#migration">Vibe Migration</a></li>
         <li><a href="#poc">1-Week PoC</a></li>
         <li><a href="#ai">AI Add-ons</a></li>
+        <li><a href="#pricing">Pricing</a></li>
         <li><a href="#engage">Engage</a></li>
       </ul>
       <a class="btn" href="#contact">Book a call</a>
@@ -161,6 +164,34 @@ footer{padding:48px 0;border-top:1px solid var(--line);color:var(--muted);font-s
     <div class="chips">
       <span>Azure AI Foundry</span><span>Azure OpenAI</span><span>.NET / C#</span><span>Azure App Service &amp; Functions</span><span>AKS</span><span>Azure SQL &amp; Cosmos DB</span><span>Entra ID</span><span>Azure DevOps &amp; GitHub Actions</span><span>Power Platform</span><span>Microsoft 365 / Graph</span>
     </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="wrap">
+    <h2>Pricing</h2>
+    <p class="sub">Transparent starting points for the services you can scope up front. Everything is fixed price; builds, retainers and AI platforms are quoted after a short call.</p>
+    <div class="grid">
+      <div class="card price">
+        <span class="tag">Start here</span>
+        <h3>Migration assessment</h3>
+        <div class="amt"><small>from</small> $4,500</div>
+        <ul class="ticks"><li>Security, scale and maintainability review</li><li>Risk-rated findings report</li><li>Fixed-price migration quote</li><li>Fee credited if you proceed within 30 days</li></ul>
+      </div>
+      <div class="card price">
+        <span class="tag">Fixed price · 5 days</span>
+        <h3>1-week PoC</h3>
+        <div class="amt"><small>from</small> $12,500</div>
+        <ul class="ticks"><li>Working demo on real or representative data</li><li>Findings and production estimate</li><li>AI / Foundry PoC from $18,500</li><li>Two-week extended option</li></ul>
+      </div>
+      <div class="card price">
+        <span class="tag">After launch</span>
+        <h3>Production support</h3>
+        <div class="amt"><small>from</small> $2,500<small>/mo per app</small></div>
+        <ul class="ticks"><li>Patching, monitoring and monthly health report</li><li>Standard and Premium tiers with faster response</li><li>24x7 on-call available</li><li>For apps we built, migrated or assessed</li></ul>
+      </div>
+    </div>
+    <p class="sub" style="margin:24px 0 0">Vibe migration projects, application development, AI add-ons and retainers are scoped to your system and quoted after the assessment or a short call. Prices exclude tax and cloud or model usage.</p>
   </div>
 </section>
 
