@@ -40,7 +40,7 @@ IT consulting firm that takes vibe-coded PoCs and MVPs to production and keeps t
 
 ## Website
 
-`index.html` is a self-contained static page (no build step). Open it in a browser or host it on any static host (Azure Static Web Apps, GitHub Pages).
+`index.html` is a self-contained static page (no build step). Open it in a browser or host it on any static host. `site/` contains a ready-made Fly.io deployment (nginx).
 
 The "Get started" buttons on the site (header, hero, contact) lead to the onboarding platform. The address is the `onboarding-url` meta tag at the top of `index.html`; it is set to `http://localhost:3001/` for local use, so change it to the deployed address before launch. If the tag is emptied, the buttons fall back to email.
 
@@ -49,7 +49,8 @@ The "Get started" buttons on the site (header, hero, contact) lead to the onboar
 | File | Purpose |
 |---|---|
 | `index.html` | Marketing website |
-| `platform/` | Customer onboarding site (React) with an API and local SQLite database; see `platform/README.md` |
+| `platform/` | Customer onboarding site (React) with an API and SQLite database, packaged for Fly.io (Dockerfile, `fly.toml`, Litestream backup); see `platform/README.md` |
+| `site/` | Fly.io deployment for the marketing page (nginx) |
 | `PRICING.md` | Draft pricing tiers for every service, and bundles |
 | `PROPOSAL_TEMPLATE.md` | Client proposal template |
 | `NDA.md` | Mutual non-disclosure agreement (pre-contract) |
@@ -57,7 +58,7 @@ The "Get started" buttons on the site (header, hero, contact) lead to the onboar
 | `SOW_POC.md` | Statement of work for the 1-week PoC |
 | `DPA.md` | Data processing agreement (when personal data is processed) |
 | `AI_POLICY.md` | Internal AI acceptable-use and tooling policy |
-| `AZURE_DEPLOYMENT_PLAN.md` | Plan for hosting the site and platform on Azure: architecture, code changes needed, environments, security, operations, rollout and go-live checklist |
+| `FLY_DEPLOYMENT_PLAN.md` | Plan for hosting the site and platform on Fly.io: architecture, step-by-step first deploy, backups and recovery, security, operations, what was and was not tested, go-live checklist |
 | `PRIVACY_NOTICE.md` | Draft privacy notice (public text, notes and questions for counsel, product gaps). The platform's `/privacy` page is generated from it |
 | `CASE_STUDY_TEMPLATE.md` | Case study template, interview guide and publication approval checklist |
 

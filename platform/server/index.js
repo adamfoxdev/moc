@@ -3,6 +3,13 @@ import { createStore } from './db.js';
 import { createMailer, mailConfigFromEnv } from './mail.js';
 import { createNotifier } from './notifier.js';
 import { createRetention } from './retention.js';
+import { productionProblems } from './config.js';
+
+const problems = productionProblems();
+if (problems.length) {
+  console.error('Refusing to start in production:\n' + problems.map((p) => `  - ${p}`).join('\n'));
+  process.exit(1);
+}
 
 const store = createStore();
 const mailConfig = mailConfigFromEnv(); // throws with a clear message if SMTP is half-configured

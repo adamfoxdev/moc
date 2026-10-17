@@ -1,0 +1,18 @@
+# Fly.io configuration for the marketing site (a static page behind nginx).
+# Deploy with ./deploy.sh from this folder.
+app = "northbound-site"            # change: app names are global
+primary_region = "lhr"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"      # fine for a static page: starts on the first request
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

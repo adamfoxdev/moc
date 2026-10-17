@@ -34,9 +34,11 @@ ADMIN_TOKEN=choose-a-long-secret npm start     # everything on http://localhost:
 |---|---|---|
 | `ADMIN_TOKEN` | none (admin off) | Secret for the `/admin` view |
 | `NOTIFY_TO` | none | Comma-separated team addresses for new-request alerts |
-| `MAIL_TRANSPORT` | `log` | `log` (print only) or `smtp` |
+| `MAIL_TRANSPORT` | `log` | `log` (print only, not allowed in production), `smtp`, `resend` or `postmark` |
 | `MAIL_FROM`, `MAIL_REPLY_TO` | placeholder, `MAIL_FROM` | Sender, and where customer replies go |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | port 587 | SMTP server (port 465 uses implicit TLS) |
+| `MAIL_API_KEY` | none | Resend or Postmark API key (`MAIL_TRANSPORT=resend` or `postmark`) |
+| `BUCKET_NAME`, `AWS_*` | none | Backup bucket; set by `fly storage create`. Without `BUCKET_NAME` the container warns that nothing is backed up |
 | `PUBLIC_URL` | none | Base URL for the inbox link in team alerts and the privacy link in confirmations |
 | `RETENTION_DAYS` | `365` | Delete requests inactive this long (`0` = never) |
 | `PORT` | `3001` | API and production server port |
@@ -80,7 +82,7 @@ How it is built:
 - **Abuse limits.** The confirmation is only ever sent to the address on the form, and at most twice per address per day, so the form can't be used to mail-bomb someone. Names and text are escaped in HTML and kept out of headers.
 - **Sender.** `From` is always `MAIL_FROM`. We never put the customer's address in From.
 
-Setup: copy `.env.example` to `.env`, then `node --env-file=.env server/index.js`. By default `MAIL_TRANSPORT=log` prints emails to the console and sends nothing. For real sending, set `MAIL_TRANSPORT=smtp` with `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` and `MAIL_FROM` (Microsoft 365 or Azure Communication Services Email both work over SMTP). Half-configured SMTP stops the server at startup with a clear message. Use a sending domain with SPF, DKIM and DMARC set up, or confirmations will land in spam.
+Setup: copy `.env.example` to `.env`, then `node --env-file=.env server/index.js`. By default `MAIL_TRANSPORT=log` prints emails to the console and sends nothing (development only: production refuses to start with it). For real sending set `MAIL_TRANSPORT` to `resend` or `postmark` (HTTPS APIs, which work on Fly.io where outbound SMTP is restricted) with `MAIL_API_KEY` and `MAIL_FROM`, or to `smtp` with `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`. Half-configured settings stop the server at startup with a clear message. Use a sending domain with SPF, DKIM and DMARC set up, or confirmations will land in spam.
 
 ## Privacy: retention, export, deletion, notice
 
@@ -102,15 +104,26 @@ Setup: copy `.env.example` to `.env`, then `node --env-file=.env server/index.js
 - Security headers (`nosniff`, frame denial, same-origin referrer).
 - The form asks people not to send passwords, keys or customer data.
 
-## Deploying
+## Deploying (Fly.io)
 
-See `../AZURE_DEPLOYMENT_PLAN.md`. The short version: the SQLite file must be replaced by Azure SQL before production, and run a single instance until the email worker has a lease. The deployment package must include `web/src/privacy-notice.md`, which `server/notice.js` reads at runtime.
+See `../FLY_DEPLOYMENT_PLAN.md` for the full plan and first-deploy commands. In short: one Fly machine with a volume at `/data` holding the SQLite file, continuously backed up to Tigris by Litestream, deployed from this folder with `fly deploy --ha=false`.
+
+| File | Purpose |
+|---|---|
+| `Dockerfile` | Build the React app, then a slim Node runtime running as a non-root user |
+| `docker-entrypoint.sh` | Fix volume ownership, restore from backup if the volume is empty, run the app under Litestream |
+| `litestream.yml` | Backup replica settings (Tigris, 7-day window) |
+| `fly.toml` | Fly app configuration |
+| `../site/` | Fly deployment of the marketing page |
+| `../.github/workflows/platform.yml` | Tests on every change, deploy from `main` |
+
+Things to know: run **one** machine only (the volume and the email worker are single-instance); in production the app **refuses to start** with unsafe settings (see `server/config.js`); `GET /api/ready` checks the database and is the health check; the deployment package must include `web/src/privacy-notice.md` (the Dockerfile does).
 
 ## Known limits (deliberate, for a first version)
 
 - **Single admin token**, not named users. Next step: Entra ID sign-in for staff.
 - **Rate limiting is per process.** Use a shared store or gateway limit if you run more than one instance.
-- **Local SQLite file.** Fine for one instance; for production use Azure SQL by replacing `server/db.js`, and encrypt and back up the data. It holds personal data, so see `DPA.md` and your privacy notice.
+- **One machine only.** SQLite on one volume cannot be shared, and the email worker would double-send. Before scaling out, add an outbox lease and move to a database several machines can use (LiteFS or Postgres by replacing `server/db.js`). It holds personal data, so see `DPA.md` and your privacy notice.
 - **The privacy notice is still a draft for counsel** (`../PRIVACY_NOTICE.md`). It is linked everywhere, but shows a draft banner until the placeholders are filled in. Open items in its Part C: edit-token expiry, console logging of emails in `log` mode, mailbox and backup retention, admin sign-in and hosting logs.
-- **Node's `node:sqlite` is still marked experimental.** It is wrapped in `server/db.js`, so swapping to `better-sqlite3` or Azure SQL touches one file.
+- **Node's `node:sqlite` is still marked experimental.** It is wrapped in `server/db.js`, so swapping to `better-sqlite3` or another database touches one file.
 - Placeholder name "Northbound", no real branding.

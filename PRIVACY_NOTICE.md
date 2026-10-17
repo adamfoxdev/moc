@@ -85,8 +85,9 @@ We share personal data only with providers who help us run the service, under wr
 
 | Provider type | What they do | Where |
 |---|---|---|
-| {{Hosting / cloud provider, e.g. Microsoft Azure}} | Runs our website, application and database | {{REGION}} |
-| {{Email provider, e.g. Microsoft 365 / Azure Communication Services}} | Sends and receives email on our behalf | {{REGION}} |
+| {{Hosting provider, e.g. Fly.io}} | Runs our website, application and database | {{REGION}} |
+| {{Backup storage provider, e.g. Tigris Data (via Fly.io)}} | Holds encrypted-in-transit backup copies of the database for {{7 days}} | {{REGION}} |
+| {{Email provider, e.g. Resend or Postmark}} | Sends the confirmation and alert emails on our behalf | {{REGION}} |
 | {{Other: scheduling, CRM, support tools, if any}} | {{PURPOSE}} | {{REGION}} |
 
 We may also disclose information if the law requires it or to protect rights, safety or security.
@@ -204,12 +205,12 @@ Gaps between what the notice promises and what the code does. Items 1 to 4 are b
 | 3 | **Links to the notice** (DONE) | Transparency at the point of collection | `/privacy` page (rendered from Part A, with a draft banner while placeholders remain); link beside the consent checkbox, in every page footer, in the confirmation email and in the marketing site footer. |
 | 4 | **Consent record** (DONE) | Evidence of what was agreed | The time consent was given and a fingerprint of the notice version shown are stored with each request. The consent wording itself is not versioned separately. |
 | 5 | **Edit token never expires** | Long-lived bearer secret for personal data | Expire after, for example, 30 days; consider hashing it in the database |
-| 6 | **`MAIL_TRANSPORT=log` prints personal data to console** | Fine for development, risky in a hosted environment | Fail startup in production if the transport is `log`, or redact the body in log mode |
-| 7 | **Encryption at rest and backups undecided** (local SQLite file) | Notice section 7 can't claim it yet | Decide when moving to Azure SQL or similar; update section 7 |
-| 8 | **Single shared admin token, no access log** | Weak accountability for who viewed personal data | Entra ID sign-in for staff, with an audit log of views and changes |
+| 6 | **Console logging of email text** (DONE) | `MAIL_TRANSPORT=log` printed personal data to the logs | In production the app refuses to start with the `log` transport (and with an unsafe `PUBLIC_URL`, missing `NOTIFY_TO` or a short `ADMIN_TOKEN`). `log` remains for local development only. |
+| 7 | **Encryption at rest** | Notice section 7 must not claim more than is verified | Hosting is a Fly.io volume with continuous backup to a Tigris bucket. **Verify and then state** whether volumes and buckets are encrypted at rest; claim encryption in transit (HTTPS, TLS to the bucket and email API) only once checked. See `FLY_DEPLOYMENT_PLAN.md` section 12 |
+| 8 | **Single shared admin token, no named users** (PARTLY DONE) | Weak accountability for who viewed personal data | Wrong-token attempts are now rate limited (lockout per address) and deletions/exports are audited. Still open: named staff sign-in (an identity-aware proxy in front of `/admin`, or OIDC in the app) |
 | 9 | **Hosting and proxy logs not configured** | Notice says logs are kept for a set period | Set retention on the hosting platform and mask IPs if possible |
 | 10 | **Cookie/storage statement** | Must stay true | Re-check whenever anyone adds analytics, fonts, embeds or chat widgets |
 | 11 | **Copies in mailboxes** | Deleting a request does not delete emails already sent. The team alert lands in the `NOTIFY_TO` mailbox and the confirmation in the customer's | Set a retention rule on the team mailbox (or use a shared mailbox with auto-delete) and say so in the notice; the delete screen already tells people about this |
-| 12 | **Backups** | Deleted data may persist in database backups until they expire | Decide backup retention when hosting is chosen, and state it in section 6 |
+| 12 | **Backups** | Deleted data persists in backups until they expire | Continuous backup keeps a **7-day** point-in-time window (`litestream.yml` `retention: 168h`); state this in section 6 of the public notice and keep it in line with `RETENTION_DAYS`. Fly volume snapshots are a second layer: verify their retention too |
 
 *Before promoting the platform publicly, also settle items 6, 11 and 12, and have counsel finalise Part A so the draft banner can come off.*

@@ -20,12 +20,15 @@ export const STATUSES = ['new', 'contacted', 'call-booked', 'working', 'closed']
 
 /**
  * Local persistence for onboarding requests. Everything the app needs from a
- * database goes through this object, so moving to Azure SQL later means
+ * database goes through this object, so moving to another database later means
  * replacing this file and nothing else.
  */
 export function createStore(path = process.env.DB_PATH || defaultPath) {
   if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
   const db = new DatabaseSync(path);
+  // WAL is required for Litestream's continuous backup and lets readers and the writer overlap.
+  if (path !== ':memory:') db.exec('PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL;');
+  db.exec('PRAGMA busy_timeout = 5000;');
   db.exec(`
     CREATE TABLE IF NOT EXISTS requests (
       id TEXT PRIMARY KEY,
@@ -187,6 +190,7 @@ export function createStore(path = process.env.DB_PATH || defaultPath) {
     hasPendingEmail: (kind, requestId) => !!pendingOfKind.get(kind, requestId),
     countRecentEmails: (kind, to, since) => recentTo.get(kind, to, since.toISOString()).n,
     retryEmail: (id, now = new Date()) => retryEmail.run(now.toISOString(), id).changes > 0,
+    ping: () => db.prepare('SELECT 1 AS ok').get().ok === 1,
     close: () => db.close(),
   };
 }

@@ -1,0 +1,14 @@
+# Continuous backup of the SQLite database to S3-compatible storage (Tigris on Fly.io).
+# `fly storage create` sets BUCKET_NAME, AWS_ENDPOINT_URL_S3, AWS_REGION and the AWS keys as secrets.
+dbs:
+  - path: /data/platform.db
+    replicas:
+      - type: s3
+        bucket: ${BUCKET_NAME}
+        path: platform
+        endpoint: ${AWS_ENDPOINT_URL_S3}
+        region: ${AWS_REGION}
+        # Point-in-time restore window. Deleted data stays in backups this long: keep it in line
+        # with what the privacy notice says about backups.
+        retention: 168h
+        snapshot-interval: 24h

@@ -22,6 +22,8 @@ export function createApp({
   maxSubmissions = 5,
   windowMs = 15 * 60 * 1000,
   serveStatic = true,
+  hsts = process.env.NODE_ENV === 'production',
+  maxAdminFailures = 10,
 } = {}) {
   const app = express();
   app.disable('x-powered-by');
@@ -33,6 +35,10 @@ export function createApp({
       'X-Content-Type-Options': 'nosniff',
       'Referrer-Policy': 'same-origin',
       'X-Frame-Options': 'DENY',
+      // Everything the pages load comes from this origin; nothing inline, nothing third-party.
+      'Content-Security-Policy': "default-src 'self'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+      'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+      ...(hsts ? { 'Strict-Transport-Security': 'max-age=31536000' } : {}),
     });
     next();
   });
@@ -55,6 +61,10 @@ export function createApp({
   const publicView = (r) => ({ reference: r.id, name: r.name, answers: r.answers, recommendation: r.recommendation });
 
   app.get('/api/health', (_req, res) => res.json({ ok: true }));
+  // Readiness: can we reach the database? Used by the platform's health check.
+  app.get('/api/ready', (_req, res) => {
+    try { return res.json({ ok: store.ping() }); } catch { return res.status(503).json({ ok: false }); }
+  });
 
   // Get in the door: only goal, name, email and consent are required.
   app.post('/api/requests', (req, res) => {
@@ -143,10 +153,22 @@ export function createApp({
   });
 
   const admin = express.Router();
+  // Wrong tokens can only be tried so many times per address in a window.
+  const failures = new Map();
   admin.use((req, res, next) => {
     if (!adminToken) return res.status(503).json({ error: 'Admin is disabled. Set ADMIN_TOKEN to enable it.' });
+    const now = Date.now();
+    const recent = (failures.get(req.ip) || []).filter((t) => now - t < windowMs);
+    if (recent.length >= maxAdminFailures) {
+      failures.set(req.ip, recent);
+      return res.status(429).json({ error: 'Too many failed attempts. Try again later.' });
+    }
     const given = req.get('x-admin-token');
-    if (!given || !safeEqual(given, adminToken)) return res.status(401).json({ error: 'Unauthorised.' });
+    if (!given || !safeEqual(given, adminToken)) {
+      recent.push(now);
+      failures.set(req.ip, recent);
+      return res.status(401).json({ error: 'Unauthorised.' });
+    }
     next();
   });
   admin.get('/requests', (_req, res) => res.json({ statuses: STATUSES, requests: store.list() }));

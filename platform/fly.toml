@@ -1,0 +1,46 @@
+# Fly.io configuration for the onboarding platform.
+# Deploy from this folder:  fly deploy --ha=false
+# (--ha=false: one machine only. The SQLite volume belongs to a single machine, and the email
+#  worker must not run twice.)
+
+app = "northbound-onboarding"      # change: app names are global
+primary_region = "lhr"             # change: where the data lives; match the privacy notice
+kill_signal = "SIGINT"
+kill_timeout = 30                  # seconds to finish in-flight work and flush the backup
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "8080"
+  DB_PATH = "/data/platform.db"
+  TRUST_PROXY = "1"                # Fly's proxy is one hop in front of the app
+  RETENTION_DAYS = "365"
+  MAIL_TRANSPORT = "resend"        # or "postmark"; see README
+  PUBLIC_URL = "https://onboarding.example.com"   # change
+  # Secrets (set with `fly secrets set`, not here): ADMIN_TOKEN, MAIL_API_KEY, MAIL_FROM,
+  # MAIL_REPLY_TO, NOTIFY_TO. Backup secrets come from `fly storage create`.
+
+[mounts]
+  source = "northbound_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # Never stop the machine: the email queue and retention job run inside the app.
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    method = "GET"
+    path = "/api/ready"
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "20s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

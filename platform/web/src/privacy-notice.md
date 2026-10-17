@@ -70,8 +70,9 @@ We share personal data only with providers who help us run the service, under wr
 
 | Provider type | What they do | Where |
 |---|---|---|
-| {{Hosting / cloud provider, e.g. Microsoft Azure}} | Runs our website, application and database | {{REGION}} |
-| {{Email provider, e.g. Microsoft 365 / Azure Communication Services}} | Sends and receives email on our behalf | {{REGION}} |
+| {{Hosting provider, e.g. Fly.io}} | Runs our website, application and database | {{REGION}} |
+| {{Backup storage provider, e.g. Tigris Data (via Fly.io)}} | Holds encrypted-in-transit backup copies of the database for {{7 days}} | {{REGION}} |
+| {{Email provider, e.g. Resend or Postmark}} | Sends the confirmation and alert emails on our behalf | {{REGION}} |
 | {{Other: scheduling, CRM, support tools, if any}} | {{PURPOSE}} | {{REGION}} |
 
 We may also disclose information if the law requires it or to protect rights, safety or security.
