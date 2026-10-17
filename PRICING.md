@@ -66,7 +66,7 @@ Deliverable: risk-rated findings (security, scale, maintainability, licensing), 
 | Standard | $45,000 | App plus data layer and integrations, tests, IaC, pipelines |
 | Complex | from $95,000 | Multiple services, compliance requirements, data migration |
 
-Both paths include a handover pack (architecture, runbooks) and 30 days of post-launch support. Applications built on stacks outside our core set are quoted after assessment.
+Both paths include a handover pack (architecture, runbooks) and the 30-day warranty in the MSA (clause 10.2), counted from acceptance. Applications built on stacks outside our core set are quoted after assessment.
 
 ## 5. AI / LLM add-ons
 
@@ -92,9 +92,9 @@ Support is offered only on applications we built or migrated, or that pass an as
 
 | Bundle | Price | Contents |
 |---|---|---|
-| **Prototype to Production** | $39,500 | Standard assessment + Standard automatic migration (credits the assessment) + 3 months of Essential support |
-| **AI Starter** | $27,500 | AI/Foundry PoC + credit toward a single-use-case add-on |
-| **Growth** | $15,000 / mo | Embedded retainer + Standard support on one app |
+| **Prototype to Production** | $49,500 | Standard assessment ($9,500) + Standard automatic migration ($45,000) + 3 months of Essential support ($7,500). Separately $62,000; the assessment fee is credited against the migration ($52,500), and the bundle takes a further $3,000 off |
+| **AI Starter** | $27,500 | AI/Foundry PoC ($18,500) with the fee credited toward a single-use-case add-on (priced $20,000-$35,000), so the PoC plus a mid-range add-on totals $27,500 |
+| **Growth** | $15,000 / mo | Embedded retainer ($12,000) + Standard support on one app ($6,500). Separately $18,500; the bundle saves $3,500 per month |
 
 ## To validate before publishing
 

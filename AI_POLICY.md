@@ -70,7 +70,7 @@ Record the decision, date, owner and review date in the tool register ({{LOCATIO
 
 5.1 **Default.** Before using any AI tool on a client's materials, check the contract (MSA, SOW, NDA and DPA) and the client's own AI rules. The stricter rule wins.
 
-5.2 **Disclose.** Each client is told, in the SOW or onboarding, which AI tools we use on their work. Some clients will restrict tools or prohibit AI use; follow that.
+5.2 **Disclose.** Each client is told, in the SOW or onboarding, which AI tools we use on their work. Some clients will restrict tools or prohibit AI use; follow that. Before any contract beyond an NDA is signed, the NDA (section 3.5) bars putting confidential information into third-party AI services without written consent, so get the prospect's written approval of the specific tools first (use the Appendix C wording), or do the work without AI.
 
 5.3 **Classify what you are about to input:**
 

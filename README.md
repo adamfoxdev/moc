@@ -33,7 +33,7 @@ IT consulting firm that takes vibe-coded PoCs and MVPs to production and keeps t
 ## Open decisions
 
 - Final firm name and domain (site uses "Northbound" as a placeholder).
-- Pricing for each service (not published on the site yet).
+- Validated pricing (drafted in `PRICING.md`; the site shows "from" prices for the assessment, PoC and support only).
 - Real case studies and testimonials; none are invented here.
 - Contact email and booking link (placeholder `hello@example.com`).
 - Legal entity, insurance, and the support SLA tiers.
@@ -41,3 +41,18 @@ IT consulting firm that takes vibe-coded PoCs and MVPs to production and keeps t
 ## Website
 
 `index.html` is a self-contained static page (no build step). Open it in a browser or host it on any static host (Azure Static Web Apps, GitHub Pages).
+
+## Documents
+
+| File | Purpose |
+|---|---|
+| `index.html` | Marketing website |
+| `PRICING.md` | Draft pricing tiers for every service, and bundles |
+| `PROPOSAL_TEMPLATE.md` | Client proposal template |
+| `NDA.md` | Mutual non-disclosure agreement (pre-contract) |
+| `MSA.md` | Master services agreement, with SOW template and rate card |
+| `SOW_POC.md` | Statement of work for the 1-week PoC |
+| `DPA.md` | Data processing agreement (when personal data is processed) |
+| `AI_POLICY.md` | Internal AI acceptable-use and tooling policy |
+
+The legal documents are drafts for lawyer review. Defined terms, numbers (warranty 30 days, breach notice 72 hours, payment 30 days, rate card, 30-day fee credit) and clause cross-references are meant to agree across them; change them together.

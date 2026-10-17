@@ -137,7 +137,7 @@ If an assumption proves false, we will raise it promptly and agree any change in
 
 - Work happens in {{client tenant / our tenant}}; credentials are held in a secrets manager and revoked at close.
 - Client data is used only for this engagement and deleted or returned at close, unless agreed otherwise.
-- Client data is not used to train models. AI services are configured accordingly.
+- Northbound does not use Client data to train its own models, and configures AI services so Client data is not used to train provider models where the provider offers that setting (the default for Azure OpenAI). See the MSA, clause 9.1.
 - Ownership: {{deliverables become the client's property on payment; pre-existing Northbound tooling remains ours and is licensed for use with the deliverables}}.
 - Confidentiality is governed by {{NDA reference / MSA clause}}.
 

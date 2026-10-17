@@ -4,7 +4,7 @@
 
 This Master Services Agreement (the "**Agreement**") is made on {{DATE}} (the "**Effective Date**") between:
 
-**{{NORTHBOUND_LEGAL_NAME}}**, a {{ENTITY_TYPE}} registered in {{JURISDICTION}} under number {{REG_NO}}, with its registered office at {{ADDRESS}} ("**Consultant**"); and
+**{{NORTHBOUND_LEGAL_NAME}}**, a {{ENTITY_TYPE}} registered in {{JURISDICTION}} under number {{REG_NO}}, with its registered office at {{ADDRESS}} ("**Consultant**" or "**Northbound**"); and
 
 **{{CLIENT_LEGAL_NAME}}**, a {{ENTITY_TYPE}} registered in {{JURISDICTION}} under number {{REG_NO}}, with its registered office at {{ADDRESS}} ("**Client**").
 
@@ -25,7 +25,7 @@ This Master Services Agreement (the "**Agreement**") is made on {{DATE}} (the "*
 
 2.1 This Agreement governs all Services. Each SOW is a separate contract incorporating this Agreement.
 
-2.2 If there is a conflict, the order of precedence is: (a) the SOW, but only for the specific point and only where it expressly states it overrides this Agreement; (b) this Agreement; (c) any attached policy or schedule.
+2.2 If there is a conflict, the order of precedence is: (a) the SOW, but only for the specific point and only where it expressly states it overrides this Agreement; (b) the Data Processing Agreement, on data-protection matters only; (c) this Agreement; (d) any attached policy or schedule.
 
 2.3 Terms in Client purchase orders or portals do not apply, even if signed or clicked, unless both parties sign an amendment.
 

@@ -112,7 +112,7 @@ If access or data is not ready on day 1, the start date moves and the schedule s
 - Data provided is limited to the agreed sample, with sensitive and production personal data removed or masked (MSA clause 8.4) unless the parties agree otherwise in writing here: {{EXCEPTIONS}}.
 - Client has authority to share the code and data provided, including AI-generated code (MSA clause 6.5).
 - Required Azure subscriptions, quotas and AI model access (for example Azure OpenAI or Foundry deployments) are available or Northbound is given rights to create them in a sandbox. Model-quota delays may affect results.
-- The PoC is built for demonstration. It is not production-ready, is not covered by the warranty or by a support commitment, and should not be used with live data or live users.
+- The PoC is built for demonstration. It is not production-ready, is not covered by the warranty or by a support commitment (this SOW overrides MSA clause 10.2 and clause 14 for the PoC), and should not be used with live data or live users.
 - Evaluation results depend on the sample data and may not be representative of production performance.
 - {{OTHER_ASSUMPTIONS}}
 
