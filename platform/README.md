@@ -100,6 +100,32 @@ Setup: copy `.env.example` to `.env`, then `node --env-file=.env server/index.js
 - **The shared token is switched off** once sign-in is configured (unless `ALLOW_ADMIN_TOKEN=true`). Production start-up prints a warning if sign-in is missing or the token fallback is left on.
 - **Rate limited:** sign-in attempts per address; wrong shared tokens lock out.
 
+**Setting it up with Google** (free; the quickest way to start). Google changes its console layout from time to time, so labels may differ slightly.
+
+1. Go to the [Google Cloud console](https://console.cloud.google.com/) and sign in with the Google account that should own this (a shared company account is better than a personal one). Create a **project** from the project picker at the top (for example "Northbound onboarding"). No billing is needed.
+2. Open the **Google Auth Platform** ([console.cloud.google.com/auth/overview](https://console.cloud.google.com/auth/overview)) and choose *Get started*. Older layout: *APIs & Services > OAuth consent screen*. Fill in the app name, a support email and a contact email, and choose **External** as the audience.
+3. Under **Audience**, leave the app in **Testing** and add each staff member's Google address under *Test users* (up to 100). In Testing, each person's consent expires after about 7 days, so staff re-confirm roughly weekly. To avoid that, publish the app (Audience > *Publish app*); because we only ask for `openid`, `email` and `profile`, no Google review should be needed (Google's production-readiness page says basic identity scopes are open to any account; confirm this when you publish).
+4. Under **Clients**, choose *Create client*, type **Web application**. Add **Authorized redirect URIs** (they must match exactly):
+   - `http://localhost:5173/auth/callback` to try it on your computer
+   - `https://<your site>/auth/callback` for the live site (first the `*.fly.dev` address, later your own domain)
+
+   Leave *Authorized JavaScript origins* empty. Create it, then **copy the Client ID and Client secret straight away**.
+5. Under **Data access**, the default scopes (`openid`, `email`, `profile`) are all that is needed. Do not add any others.
+6. Put these in `.env` (see `.env.example`) or `fly secrets set`:
+   ```
+   OIDC_ISSUER=https://accounts.google.com
+   OIDC_CLIENT_ID=<client id>.apps.googleusercontent.com
+   OIDC_CLIENT_SECRET=<client secret>
+   ADMIN_EMAILS=you@gmail.com,colleague@gmail.com
+   SESSION_SECRET=<openssl rand -hex 32>
+   PUBLIC_URL=http://localhost:5173        # or https://<your site>
+   ```
+7. Run `npm run check:auth`. It reaches Google, confirms the settings match, and prints the exact redirect URI to register. Then `npm run dev`, open `http://localhost:5173/admin`, and click *Sign in*.
+
+If Google shows `redirect_uri_mismatch`, the address registered in step 4 differs from the one `check:auth` printed (a different port, `http` vs `https`, or a trailing slash). If it shows "Access blocked: app has not completed verification" or similar, add that person under *Test users* (Testing mode) or publish the app.
+
+Google accounts cannot have 2-step verification enforced from our side or by you centrally (without a paid Workspace or a Cloud Identity domain). **Ask each person to turn on 2-Step Verification** on their Google account. The allowlist still blocks everyone else.
+
 **Setting it up with Microsoft Entra ID** (steps not yet verified against a live tenant):
 
 1. Entra admin centre > App registrations > New registration. Single tenant. Redirect URI (type Web): `https://<PUBLIC_URL host>/auth/callback`.

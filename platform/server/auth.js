@@ -27,8 +27,11 @@ export function authConfigFromEnv(env = process.env) {
   const emails = env.ADMIN_EMAILS.split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
   if (!emails.length) throw new Error('ADMIN_EMAILS must list at least one staff email address');
   const publicUrl = new URL(env.PUBLIC_URL);
+  const issuer = env.OIDC_ISSUER.replace(/\/$/, '');
   return {
-    issuer: env.OIDC_ISSUER.replace(/\/$/, ''),
+    issuer,
+    // Google's tokens may carry the issuer with or without the scheme; both are Google's.
+    acceptedIssuers: issuer === 'https://accounts.google.com' ? [issuer, 'accounts.google.com'] : [issuer],
     clientId: env.OIDC_CLIENT_ID,
     clientSecret: env.OIDC_CLIENT_SECRET,
     sessionSecret: env.SESSION_SECRET,
@@ -159,7 +162,7 @@ export function createAuth({ store, config, now = () => Date.now(), fetchImpl = 
       if (!tokenRes.ok || !tokens.id_token) return fail('token-exchange', String(tokenRes.status));
 
       const { payload } = await jwtVerify(tokens.id_token, jwks, {
-        issuer: config.issuer,
+        issuer: config.acceptedIssuers,
         audience: config.clientId,
         algorithms: ['RS256', 'ES256'],
         clockTolerance: 60,

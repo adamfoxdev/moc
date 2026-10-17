@@ -74,7 +74,7 @@ Tests: 52 pass, including staff sign-in against a fake provider and attack cases
 | 5 | **Where the marketing site lives** | A second Fly app (included) or any static host (GitHub Pages, Cloudflare Pages) | Fly is simplest to keep in one place |
 | 6 | **Backup retention** | 168 hours (7 days), set in `litestream.yml` | Deleted data stays in backups this long; the privacy notice must say so |
 | 7 | **Who is on call, and how they are alerted** | A named person | Alerts are only useful if someone gets them |
-| 8 | **Identity provider for staff sign-in** | Microsoft Entra ID (single tenant) if staff have Microsoft 365; otherwise Google | Needs an app registration, redirect URI and an allowlist; see `platform/README.md` |
+| 8 | **Identity provider for staff sign-in** | **Google** (free, quickest; ask staff to enable 2-Step Verification). Move to Microsoft Entra ID with security defaults if you want MFA enforced for you | Needs an OAuth client, the redirect URI and an allowlist; see `platform/README.md` and run `npm run check:auth` |
 
 ---
 
@@ -97,8 +97,8 @@ fly storage create --app northbound-onboarding
 
 # 3. Secrets (the email API key comes from Resend or Postmark after you verify your domain)
 fly secrets set --app northbound-onboarding \
-  OIDC_ISSUER="https://login.microsoftonline.com/<tenant-id>/v2.0" \
-  OIDC_CLIENT_ID="..." \
+  OIDC_ISSUER="https://accounts.google.com" \
+  OIDC_CLIENT_ID="....apps.googleusercontent.com" \
   OIDC_CLIENT_SECRET="..." \
   ADMIN_EMAILS="you@example.com,colleague@example.com" \
   SESSION_SECRET="$(openssl rand -hex 32)" \

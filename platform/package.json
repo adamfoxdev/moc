@@ -12,6 +12,7 @@
     "start": "NODE_ENV=production node --disable-warning=ExperimentalWarning server/index.js",
     "test": "node --disable-warning=ExperimentalWarning --test \"server/**/*.test.js\"",
     "sync:privacy": "node scripts/sync-privacy.mjs",
+    "check:auth": "node --env-file=.env scripts/check-auth.mjs",
     "prebuild": "node scripts/sync-privacy.mjs"
   },
   "dependencies": {

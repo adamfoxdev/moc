@@ -65,6 +65,13 @@ test('config: absent means token mode; partial or weak settings are rejected wit
   idp.close();
 });
 
+test('config: Google tokens are accepted with the issuer written either way; other providers only their own', async () => {
+  const base = { OIDC_CLIENT_ID: 'c', OIDC_CLIENT_SECRET: 's', ADMIN_EMAILS: 'a@b.c', SESSION_SECRET: SECRET, PUBLIC_URL: 'http://localhost:5173' };
+  assert.deepEqual(authConfigFromEnv({ ...base, OIDC_ISSUER: 'https://accounts.google.com' }).acceptedIssuers, ['https://accounts.google.com', 'accounts.google.com']);
+  assert.deepEqual(authConfigFromEnv({ ...base, OIDC_ISSUER: 'https://accounts.google.com/' }).acceptedIssuers, ['https://accounts.google.com', 'accounts.google.com']);
+  assert.deepEqual(authConfigFromEnv({ ...base, OIDC_ISSUER: 'https://login.example.com/tenant/v2.0' }).acceptedIssuers, ['https://login.example.com/tenant/v2.0']);
+});
+
 test('sign-in: full flow with PKCE, a named session, CSRF protection and per-person audit', async () => {
   const t = await start();
   const { r1, r2, r3, authorize } = await t.signIn();
