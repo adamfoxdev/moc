@@ -4,7 +4,7 @@
 #  worker must not run twice.)
 
 app = "moc-yytcxa"
-primary_region = "lhr"             # change: where the data lives; match the privacy notice
+primary_region = "ams"             # Amsterdam: where the data lives; match the privacy notice
 kill_signal = "SIGINT"
 kill_timeout = 30                  # seconds to finish in-flight work and flush the backup
 

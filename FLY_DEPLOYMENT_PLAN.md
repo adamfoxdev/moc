@@ -121,6 +121,8 @@ fly logs                                                  # no "ERROR" lines fro
 fly certs add onboarding.example.com                      # then add the DNS records it prints
 ```
 
+> **Do not run `fly launch`, and do not deploy from the repository root.** `fly launch` inspects the folder, guesses it is a static site, and writes a `Dockerfile` that copies *everything* into a public web server: the legal drafts, the platform source and all. The real deployment files are `platform/fly.toml` and `platform/Dockerfile` (app) and `site/` (marketing page). Always `cd platform` first. If `fly launch` has already created files at the root, delete them, and if the app was deployed from them, take it offline (`fly scale count 0 --app <app>`) until the real deploy replaces it.
+
 ### The same steps in Windows PowerShell
 
 The bash block above uses `$(openssl …)`, which does not work in PowerShell. Run these from `C:\moc\moc\platform`, replacing `<app>` with your app name (it must be unique across Fly) and the other `<…>` values:
@@ -135,7 +137,7 @@ notepad fly.toml
 
 # 2. App, volume and backup bucket
 fly apps create <app>
-fly volumes create northbound_data --app <app> --region lhr --size 1
+fly volumes create northbound_data --app <app> --region <region> --size 1   # same region as primary_region in fly.toml
 fly storage create --app <app>          # sets BUCKET_NAME, AWS_* secrets for you
 
 # 3. A fresh SESSION_SECRET (keep this output private; use it in the next command)
