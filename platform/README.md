@@ -204,6 +204,8 @@ For Google use `OIDC_ISSUER=https://accounts.google.com`.
 - **Staff tools** in `/admin`: full export (includes notes, email records and the audit trail), delete, and keep. `GET /api/admin/audit` lists the audit log.
 - **Audit log.** Deletions (by customer, staff or the retention job) and exports are recorded by reference and action only, never names, emails or content.
 - **Privacy notice.** `/privacy` renders the public part of `../PRIVACY_NOTICE.md`. After editing that file run `npm run sync:privacy` (`npm run build` does it too); a test fails if the page copy drifts. While the text still contains `{{placeholders}}` the page shows a draft banner. The notice is linked from the consent checkbox, every page footer, the confirmation email and the marketing site footer.
+- **Edit code.** The secret that lets someone change their own request is stored hashed and stops working after `EDIT_TOKEN_DAYS` (default 30).
+- **Audit retention.** Audit entries older than `AUDIT_RETENTION_DAYS` (default 730; `0` keeps them forever) are purged by the daily job.
 - **Consent evidence.** Each request stores when consent was given and a fingerprint of the notice version shown.
 - **Not covered by deletion:** emails already sent stay in mailboxes (set a retention rule on the team mailbox), and database backups until they expire. The delete screens say so.
 
@@ -229,7 +231,12 @@ See `../FLY_DEPLOYMENT_PLAN.md` for the full plan and first-deploy commands. In 
 | `fly.toml` | Fly app configuration (the template for every brand) |
 | `deploy/brands.json`, `scripts/fly.mjs` | Which Fly app serves which brand, and the script that sets up and deploys them (`npm run fly`) |
 | `../site/` | Fly deployment of the marketing page |
-| `../.github/workflows/platform.yml` | Tests on every change, deploy from `main` |
+| `scripts/check-sites.mjs` | `npm run check-sites`: checks `/api/ready` and the brand of every brand marked `live` in the manifest |
+| `../.github/workflows/platform.yml` | Tests on every change; on `main`, deploys each live brand (needs a `FLY_API_TOKEN_<BRAND>` secret per brand) |
+| `../.github/workflows/uptime.yml` | Runs `check-sites` every 15 minutes |
+| `../RUNBOOKS.md` | What to do when something breaks |
+
+`npm run fly -- restore-test <brand>` rehearses restoring the backup into a scratch app. `deploy` checks that the required secret names exist on Fly (skip with `--skip-checks`). A brand with `live: false` in the manifest is skipped by the workflows and the uptime check.
 
 Things to know: run **one** machine only (the volume and the email worker are single-instance); in production the app **refuses to start** with unsafe settings (see `server/config.js`); `GET /api/ready` checks the database and is the health check; the deployment package must include `web/src/privacy-notice.md` (the Dockerfile does).
 

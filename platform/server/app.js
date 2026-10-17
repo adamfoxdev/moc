@@ -22,6 +22,9 @@ export function createApp({
   brand = loadBrand(process.env.BRAND || 'northbound'),
   noticeVersion,
   brandPreview = process.env.BRAND_PREVIEW === 'true',
+  // How long the secret that lets a visitor change or delete their own request works (0 = never expires).
+  editTokenDays = process.env.EDIT_TOKEN_DAYS === undefined ? 30 : Number(process.env.EDIT_TOKEN_DAYS),
+  now = () => Date.now(),
   adminToken = process.env.ADMIN_TOKEN,
   maxSubmissions = 5,
   windowMs = 15 * 60 * 1000,
@@ -100,6 +103,12 @@ export function createApp({
   // Notification problems must never fail or slow a customer's request.
   const safely = (fn) => { try { fn(); } catch (e) { console.error('notification', e); } };
 
+  const editCodeValid = (id, given) => {
+    const c = store.checkEditToken(id, given);
+    if (!c.ok) return false;
+    return !editTokenDays || now() - Date.parse(c.createdAt) < editTokenDays * 86_400_000;
+  };
+
   const publicView = (r) => ({ reference: r.id, name: r.name, answers: r.answers, recommendation: r.recommendation });
 
   app.get('/api/health', (_req, res) => res.json({ ok: true }));
@@ -143,8 +152,7 @@ export function createApp({
   // who created the request, so a guessed reference cannot change anything.
   app.put('/api/requests/:id/details', (req, res) => {
     const token = req.get('x-edit-token');
-    const stored = store.editTokenFor(req.params.id);
-    if (!stored || !token || !safeEqual(token, stored)) return res.status(403).json({ error: 'Not allowed.' });
+    if (!editCodeValid(req.params.id, token)) return res.status(403).json({ error: 'Not allowed.' });
     const { ok, errors, value } = validateAnswers(req.body, { requireCore: false });
     if (!ok) return res.status(400).json({ errors });
     const current = store.get(req.params.id);
@@ -158,16 +166,14 @@ export function createApp({
 
   app.get('/api/requests/:id', (req, res) => {
     const token = req.get('x-edit-token');
-    const stored = store.editTokenFor(req.params.id);
-    if (!stored || !token || !safeEqual(token, stored)) return res.status(403).json({ error: 'Not allowed.' });
+    if (!editCodeValid(req.params.id, token)) return res.status(403).json({ error: 'Not allowed.' });
     res.json(publicView(store.get(req.params.id)));
   });
 
   // A person's own deletion and export, using the secret from their browser session.
   const owner = (req, res, next) => {
     const token = req.get('x-edit-token');
-    const stored = store.editTokenFor(req.params.id);
-    if (!stored || !token || !safeEqual(token, stored)) return res.status(403).json({ error: 'Not allowed.' });
+    if (!editCodeValid(req.params.id, token)) return res.status(403).json({ error: 'Not allowed.' });
     next();
   };
 

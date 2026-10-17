@@ -47,7 +47,12 @@ notifier.start();
 // Requests with no activity for this many days are deleted (clients and held requests are kept). 0 = never.
 const retentionDays = process.env.RETENTION_DAYS === undefined ? 365 : Number(process.env.RETENTION_DAYS);
 if (!Number.isInteger(retentionDays) || retentionDays < 0) throw new Error('RETENTION_DAYS must be a whole number of days (0 to disable)');
-const retention = createRetention({ store, days: retentionDays });
+// How long the record of who did what (sign-ins, views, edits, deletions) is kept. 0 = forever.
+const auditDays = process.env.AUDIT_RETENTION_DAYS === undefined ? 730 : Number(process.env.AUDIT_RETENTION_DAYS);
+if (!Number.isInteger(auditDays) || auditDays < 0) throw new Error('AUDIT_RETENTION_DAYS must be a whole number of days (0 to keep forever)');
+const editDays = process.env.EDIT_TOKEN_DAYS === undefined ? 30 : Number(process.env.EDIT_TOKEN_DAYS);
+if (!Number.isInteger(editDays) || editDays < 0) throw new Error('EDIT_TOKEN_DAYS must be a whole number of days (0 = never expires)');
+const retention = createRetention({ store, days: retentionDays, auditDays });
 retention.start();
 
 for (const sig of ['SIGINT', 'SIGTERM']) {

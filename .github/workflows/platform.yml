@@ -19,15 +19,46 @@ jobs:
       - run: npm test
       - run: npm run build
 
-  deploy:
+  # One deploy per live brand in platform/deploy/brands.json, in order, stopping at the first failure.
+  brands:
     needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    concurrency: fly-deploy
-    defaults: { run: { working-directory: platform } }
+    outputs:
+      matrix: ${{ steps.m.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
+      - id: m
+        working-directory: platform
+        run: |
+          node -e "
+          const m = require('./deploy/brands.json');
+          const include = Object.entries(m.brands).filter(([, b]) => b.live !== false)
+            .map(([id]) => ({ brand: id, secret: 'FLY_API_TOKEN_' + id.toUpperCase().replace(/-/g, '_') }));
+          console.log('matrix=' + JSON.stringify({ include }));
+          " >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: brands
+    runs-on: ubuntu-latest
+    concurrency: fly-deploy
+    strategy:
+      max-parallel: 1
+      fail-fast: true
+      matrix: ${{ fromJSON(needs.brands.outputs.matrix) }}
+    # Each app has its own deploy token (fly tokens create deploy --app <app>), stored as the secret named in the matrix,
+    # for example FLY_API_TOKEN_LANDING_GEAR. A brand with no token secret is skipped, not failed.
+    env:
+      FLY_API_TOKEN: ${{ secrets[matrix.secret] }}
+    steps:
+      - name: Skip if no token
+        if: env.FLY_API_TOKEN == ''
+        run: echo "::notice::No ${{ matrix.secret }} secret is set, so ${{ matrix.brand }} was not deployed."
+      - uses: actions/checkout@v4
+        if: env.FLY_API_TOKEN != ''
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only --ha=false
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        if: env.FLY_API_TOKEN != ''
+      - name: Deploy ${{ matrix.brand }}
+        if: env.FLY_API_TOKEN != ''
+        working-directory: platform
+        run: node scripts/fly.mjs deploy ${{ matrix.brand }} --yes --skip-checks

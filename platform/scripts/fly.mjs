@@ -7,9 +7,11 @@
 //   npm run fly -- deploy <brand|all>            deploy one machine per app and check it is healthy
 //   npm run fly -- status [brand|all]            machines, volumes and health
 //   npm run fly -- urls                          the sign-in redirect addresses to register with Google
+//   npm run fly -- restore-test <brand>          rehearse restoring the database from the backup (changes nothing live)
 //
 // Flags: --yes (do not ask before creating things)  --dry-run (print the fly commands, run nothing)
 //        --no-health (skip the web check after a deploy)
+//        --skip-checks (deploy without checking the app's secrets and volume first; for CI, where setup was done by hand)
 //
 // Apps, addresses and region live in deploy/brands.json. Secrets live in .fly-secrets/ (never committed).
 import { spawnSync } from 'node:child_process';
@@ -38,7 +40,8 @@ const manifest = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath
 
 function pickBrands(names) {
   const all = Object.keys(manifest.brands);
-  const chosen = !names.length || names.includes('all') ? all : names;
+  // "all" means every brand not marked "live": false in deploy/brands.json (naming a brand always works).
+  const chosen = !names.length || names.includes('all') ? all.filter((b) => manifest.brands[b].live !== false) : names;
   for (const b of chosen) {
     if (!manifest.brands[b]) die(`"${b}" is not in deploy/brands.json. Known: ${all.join(', ')}`);
     if (!listBrands().includes(b)) die(`"${b}" has no brand file in brands/.`);
@@ -173,13 +176,15 @@ async function deploy(brands) {
   for (const b of brands) {
     const t = target(b);
     console.log(`\n=== ${b}: ${loadBrand(b).name} (${t.app}) ===`);
-    const { missing } = secretsFor(b);
-    if (missing.length) die(`${b}: secrets not filled in: ${missing.join(', ')}`);
-    const secs = fly(['secrets', 'list', '--app', t.app], { capture: true, allowFail: true });
-    if (!DRY && secs.status !== 0) die(`${b}: the Fly app ${t.app} was not found. Run "npm run fly -- setup ${b}" first.`);
-    if (!DRY && !secs.stdout.includes('BUCKET_NAME')) die(`${b}: no backup bucket is set up (BUCKET_NAME missing). Run "npm run fly -- setup ${b}" first, or the database would not be backed up.`);
-    const vols = fly(['volumes', 'list', '--app', t.app], { capture: true, allowFail: true });
-    if (!DRY && !vols.stdout.includes(t.volume)) die(`${b}: no "${t.volume}" volume found. Run "npm run fly -- setup ${b}" first.`);
+    // Check what is really on Fly (names only), so this also works in CI where the local secrets files do not exist.
+    const CHECKS = !flags.has('--skip-checks');
+    const secs = CHECKS ? fly(['secrets', 'list', '--app', t.app], { capture: true, allowFail: true }) : { status: 0, stdout: '' };
+    if (CHECKS && !DRY && secs.status !== 0) die(`${b}: the Fly app ${t.app} was not found. Run "npm run fly -- setup ${b}" first.`);
+    if (CHECKS && !DRY && !secs.stdout.includes('BUCKET_NAME')) die(`${b}: no backup bucket is set up (BUCKET_NAME missing). Run "npm run fly -- setup ${b}" first, or the database would not be backed up.`);
+    const absent = CHECKS ? REQUIRED.filter((k) => !secs.stdout.includes(k)) : [];
+    if (CHECKS && !DRY && absent.length) die(`${b}: these secrets are not set on Fly: ${absent.join(', ')}. Run "npm run fly -- setup ${b}" first.`);
+    const vols = CHECKS ? fly(['volumes', 'list', '--app', t.app], { capture: true, allowFail: true }) : { stdout: '' };
+    if (CHECKS && !DRY && !vols.stdout.includes(t.volume)) die(`${b}: no "${t.volume}" volume found. Run "npm run fly -- setup ${b}" first.`);
 
     const out = writeFlyConfig({ brandId: b, app: t.app, url: t.url, region: t.region, outDir: configDir });
     fly(['deploy', '-c', out, '--app', t.app, '--ha=false']);
@@ -202,6 +207,21 @@ function status(brands) {
   }
 }
 
+// Restores the latest backup into a scratch file on the running machine and counts what is in it.
+// It never touches the live database. (Needs the backup settings to be visible in the ssh session: if it
+// reports a credentials or bucket error, check "fly ssh console" can see BUCKET_NAME and the AWS_* values.)
+function restoreTest(brands) {
+  for (const b of brands) {
+    const t = target(b);
+    console.log(`\n=== ${b}: ${loadBrand(b).name} (${t.app}) ===`);
+    const counter = "const d=new (require('node:sqlite').DatabaseSync)('/tmp/restore-test.db');console.log('requests in the restored copy:',d.prepare('select count(*) n from requests').get().n)";
+    const remote = `sh -c 'rm -f /tmp/restore-test.db* && litestream restore -config /etc/litestream.yml -o /tmp/restore-test.db /data/platform.db && node --disable-warning=ExperimentalWarning -e "${counter}"; rc=$?; rm -f /tmp/restore-test.db*; exit $rc'`;
+    const r = fly(['ssh', 'console', '--app', t.app, '-C', remote], { allowFail: true, show: ['ssh', 'console', '--app', t.app, '-C', '"<restore into /tmp, count rows, delete>"'] });
+    if (!DRY && r.status !== 0) die(`${b}: the restore rehearsal FAILED. Treat the backup as unproven: see RUNBOOKS.md, "Restore the database".`);
+    console.log(DRY ? 'Dry run: nothing executed.' : `${b}: the backup restored successfully.`);
+  }
+}
+
 function urls(brands) {
   for (const b of brands) console.log(`  ${b.padEnd(13)} ${target(b).url.replace(/\/$/, '')}/auth/callback`);
 }
@@ -213,6 +233,7 @@ switch (command) {
   case 'setup': await setup(pickBrands(names)); break;
   case 'deploy': await deploy(pickBrands(names)); break;
   case 'status': status(pickBrands(names)); break;
+  case 'restore-test': restoreTest(pickBrands(names)); break;
   case 'urls': console.log('Sign-in redirect addresses (add each to the Google OAuth client):'); urls(pickBrands(names)); break;
   default:
     console.log(readFileSync(new URL(import.meta.url), 'utf8').split('\n').filter((l) => l.startsWith('//')).slice(0, 15).map((l) => l.replace(/^\/\/ ?/, '')).join('\n'));

@@ -2,29 +2,29 @@
 
 > **Draft for legal review.** This is a starting-point template, not legal advice. Data-protection law varies by jurisdiction and changes often. Have a privacy lawyer qualified where you and your clients operate review it before use, particularly the transfer mechanisms (section 9), the sub-processor list (Annex 3) and the regional addenda (Annex 5). Replace every `{{PLACEHOLDER}}` and delete this note.
 >
-> **When to use:** whenever Northbound will process personal data on a client's behalf, as required by MSA clause 8.1. Where possible avoid it: use masked or synthetic data for assessments and PoCs (see `SOW_POC.md` section 8). Sign this before any such processing starts.
+> **When to use:** whenever Consultant will process personal data on a client's behalf, as required by MSA clause 8.1. Where possible avoid it: use masked or synthetic data for assessments and PoCs (see `SOW_POC.md` section 8). Sign this before any such processing starts.
 
 This Data Processing Agreement (the "**DPA**") forms part of the Master Services Agreement dated {{MSA_DATE}} (the "**MSA**") between:
 
 **{{CLIENT_LEGAL_NAME}}** ("**Client**", the "**Controller**"); and
-**{{NORTHBOUND_LEGAL_NAME}}** ("**Northbound**", the "**Processor**").
+**{{COMPANY_LEGAL_NAME}}**, trading as **{{BRAND_NAME}}** ("**Consultant**", the "**Processor**").
 
-It applies to the processing of Personal Data by Northbound on Client's behalf in providing the Services. If there is a conflict between this DPA and the MSA on data protection, this DPA prevails.
+It applies to the processing of Personal Data by Consultant on Client's behalf in providing the Services. If there is a conflict between this DPA and the MSA on data protection, this DPA prevails.
 
 ## 1. Definitions
 
 Terms not defined here have the meaning in the MSA.
 
 - "**Applicable Data Protection Law**" means laws governing the processing of personal data that apply to a party in connection with the Services, including, as applicable, the EU General Data Protection Regulation (2016/679) ("**GDPR**"), the UK GDPR and Data Protection Act 2018, the Swiss Federal Act on Data Protection, and US state privacy laws (for example the California Consumer Privacy Act as amended).
-- "**Personal Data**" means any information relating to an identified or identifiable natural person that Northbound processes on Client's behalf under the MSA. It includes "personal information" under US state law.
+- "**Personal Data**" means any information relating to an identified or identifiable natural person that Consultant processes on Client's behalf under the MSA. It includes "personal information" under US state law.
 - "**Controller**", "**Processor**", "**Data Subject**", "**Process/Processing**", "**Supervisory Authority**" and "**Personal Data Breach**" have the meanings in GDPR. For US state laws, "Controller" and "Processor" include "business" and "service provider" or "contractor" as relevant.
-- "**Sub-processor**" means a third party engaged by Northbound to process Personal Data.
+- "**Sub-processor**" means a third party engaged by Consultant to process Personal Data.
 - "**SCCs**" means the standard contractual clauses approved by the European Commission (Decision 2021/914) for transfers to third countries.
 - "**UK Addendum**" means the International Data Transfer Addendum to the SCCs issued by the UK Information Commissioner.
 
 ## 2. Roles and scope
 
-2.1 For the Personal Data processed under this DPA, Client is the Controller and Northbound is the Processor. If Client is itself a processor for another controller, Client confirms it has authority to instruct Northbound and the obligations here apply on that basis.
+2.1 For the Personal Data processed under this DPA, Client is the Controller and Consultant is the Processor. If Client is itself a processor for another controller, Client confirms it has authority to instruct Consultant and the obligations here apply on that basis.
 
 2.2 The subject matter, duration, nature and purpose of processing, categories of Personal Data and Data Subjects are set out in **Annex 1**.
 
@@ -32,9 +32,9 @@ Terms not defined here have the meaning in the MSA.
 
 ## 3. Client instructions
 
-3.1 Northbound will process Personal Data only on Client's documented instructions, which are the MSA, the relevant SOW, this DPA and any further written instruction consistent with them, unless required to do otherwise by law (in which case Northbound will inform Client first, unless prohibited).
+3.1 Consultant will process Personal Data only on Client's documented instructions, which are the MSA, the relevant SOW, this DPA and any further written instruction consistent with them, unless required to do otherwise by law (in which case Consultant will inform Client first, unless prohibited).
 
-3.2 Northbound will inform Client if, in its opinion, an instruction infringes Applicable Data Protection Law. Northbound is not obliged to carry out an instruction it reasonably believes to be unlawful.
+3.2 Consultant will inform Client if, in its opinion, an instruction infringes Applicable Data Protection Law. Consultant is not obliged to carry out an instruction it reasonably believes to be unlawful.
 
 3.3 Client is responsible for the lawfulness of the processing, including having a lawful basis, giving required notices to Data Subjects, and the accuracy and minimisation of the Personal Data it provides.
 
@@ -42,43 +42,43 @@ Terms not defined here have the meaning in the MSA.
 
 ## 4. Confidentiality and personnel
 
-Northbound will ensure that persons authorised to process Personal Data are bound by written or statutory confidentiality duties, have received appropriate data-protection training, and access Personal Data only as needed for the Services.
+Consultant will ensure that persons authorised to process Personal Data are bound by written or statutory confidentiality duties, have received appropriate data-protection training, and access Personal Data only as needed for the Services.
 
 ## 5. Security
 
-5.1 Northbound will implement and maintain the technical and organisational measures in **Annex 2**, appropriate to the risk, taking account of the state of the art, costs, and the nature, scope, context and purposes of processing.
+5.1 Consultant will implement and maintain the technical and organisational measures in **Annex 2**, appropriate to the risk, taking account of the state of the art, costs, and the nature, scope, context and purposes of processing.
 
-5.2 Northbound may update the measures provided it does not materially reduce the overall level of protection.
+5.2 Consultant may update the measures provided it does not materially reduce the overall level of protection.
 
 5.3 Client is responsible for the security of its own systems, accounts and credentials, and for its choices in configuring any environment it controls.
 
 ## 6. Sub-processors
 
-6.1 Client gives general authorisation for Northbound to engage the Sub-processors listed in **Annex 3**.
+6.1 Client gives general authorisation for Consultant to engage the Sub-processors listed in **Annex 3**.
 
-6.2 Northbound will give Client at least {{14}} days' written notice of any new or replacement Sub-processor. Client may object on reasonable data-protection grounds within that period. The parties will discuss in good faith; if the issue cannot be resolved, Client may terminate the affected Services without penalty on written notice and receive a refund of prepaid fees for the unused period.
+6.2 Consultant will give Client at least {{14}} days' written notice of any new or replacement Sub-processor. Client may object on reasonable data-protection grounds within that period. The parties will discuss in good faith; if the issue cannot be resolved, Client may terminate the affected Services without penalty on written notice and receive a refund of prepaid fees for the unused period.
 
-6.3 Northbound will impose written data-protection obligations on each Sub-processor that are no less protective than this DPA and remains liable for their performance.
+6.3 Consultant will impose written data-protection obligations on each Sub-processor that are no less protective than this DPA and remains liable for their performance.
 
 ## 7. Assistance to Client
 
-7.1 **Data Subject requests.** Taking account of the nature of processing, Northbound will promptly (and within {{5}} business days) forward to Client any Data Subject request it receives and will not respond except to acknowledge, unless instructed. Northbound will provide reasonable assistance, through appropriate measures, for Client to respond to requests to exercise rights under Applicable Data Protection Law.
+7.1 **Data Subject requests.** Taking account of the nature of processing, Consultant will promptly (and within {{5}} business days) forward to Client any Data Subject request it receives and will not respond except to acknowledge, unless instructed. Consultant will provide reasonable assistance, through appropriate measures, for Client to respond to requests to exercise rights under Applicable Data Protection Law.
 
-7.2 **Impact assessments and consultations.** Northbound will provide reasonable assistance with data protection impact assessments and prior consultation with a Supervisory Authority relating to the Services, taking into account the information available to Northbound.
+7.2 **Impact assessments and consultations.** Consultant will provide reasonable assistance with data protection impact assessments and prior consultation with a Supervisory Authority relating to the Services, taking into account the information available to Consultant.
 
 7.3 **Costs.** Assistance beyond what is reasonably incidental to the Services is chargeable at the rate card in the MSA, with Client's prior approval.
 
 ## 8. Personal Data Breach
 
-8.1 Northbound will notify Client without undue delay and in any event within **{{72}} hours** after confirming a Personal Data Breach affecting Client's Personal Data.
+8.1 Consultant will notify Client without undue delay and in any event within **{{72}} hours** after confirming a Personal Data Breach affecting Client's Personal Data.
 
 8.2 The notice will, to the extent known, describe: the nature of the breach; the categories and approximate numbers of Data Subjects and records; the likely consequences; and the measures taken or proposed. Information may be provided in phases.
 
-8.3 Northbound will take reasonable steps to contain and remediate the breach and cooperate with Client's reasonable investigation. Client is responsible for notifying Supervisory Authorities and Data Subjects where required, and for the content of those notices. Northbound's notification is not an admission of fault.
+8.3 Consultant will take reasonable steps to contain and remediate the breach and cooperate with Client's reasonable investigation. Client is responsible for notifying Supervisory Authorities and Data Subjects where required, and for the content of those notices. Consultant's notification is not an admission of fault.
 
 ## 9. International transfers
 
-9.1 Northbound will process Personal Data only in the locations in **Annex 3** (for the hosting region, Client's chosen Azure region where applicable) and will not transfer it to another country without Client's authorisation, other than as permitted in this section.
+9.1 Consultant will process Personal Data only in the locations in **Annex 3** (for the hosting region, Client's chosen Azure region where applicable) and will not transfer it to another country without Client's authorisation, other than as permitted in this section.
 
 9.2 If processing involves a transfer of Personal Data from the EEA, UK or Switzerland to a country that has not been recognised as providing adequate protection, the transfer is subject to the SCCs, which are incorporated by reference and completed as follows:
 
@@ -93,27 +93,27 @@ Northbound will ensure that persons authorised to process Personal Data are boun
 
 9.4 If a recognised alternative transfer mechanism (for example the EU-US Data Privacy Framework) applies to a recipient, the parties may rely on it for as long as it remains valid. If it is invalidated, the SCCs apply.
 
-9.5 Northbound will carry out, and on request share a summary of, a transfer risk assessment where required, and will notify Client if it can no longer comply with the SCCs.
+9.5 Consultant will carry out, and on request share a summary of, a transfer risk assessment where required, and will notify Client if it can no longer comply with the SCCs.
 
 ## 10. Audits and information
 
-10.1 Northbound will make available to Client information reasonably necessary to demonstrate compliance with this DPA, including relevant security documentation, certifications or independent audit summaries it holds (for example from its cloud providers).
+10.1 Consultant will make available to Client information reasonably necessary to demonstrate compliance with this DPA, including relevant security documentation, certifications or independent audit summaries it holds (for example from its cloud providers).
 
-10.2 If that is not sufficient, or a Supervisory Authority requires it, Client may carry out an audit, no more than once in any 12 months (except after a Personal Data Breach), on at least {{30}} days' written notice, during business hours, subject to confidentiality, without unreasonable disruption, and with the scope agreed in advance. Client bears the costs of the audit, plus Northbound's reasonable time at the rate card.
+10.2 If that is not sufficient, or a Supervisory Authority requires it, Client may carry out an audit, no more than once in any 12 months (except after a Personal Data Breach), on at least {{30}} days' written notice, during business hours, subject to confidentiality, without unreasonable disruption, and with the scope agreed in advance. Client bears the costs of the audit, plus Consultant's reasonable time at the rate card.
 
-10.3 Audits may not extend to the data of other customers or to Northbound's systems unrelated to the Services.
+10.3 Audits may not extend to the data of other customers or to Consultant's systems unrelated to the Services.
 
 ## 11. Return and deletion
 
-11.1 On termination or expiry of the Services, or on Client's earlier request, Northbound will, at Client's choice, return or delete Personal Data within **{{30}} days** and certify deletion in writing, except to the extent that law requires storage (in which case the data remains protected and is processed only for that purpose).
+11.1 On termination or expiry of the Services, or on Client's earlier request, Consultant will, at Client's choice, return or delete Personal Data within **{{30}} days** and certify deletion in writing, except to the extent that law requires storage (in which case the data remains protected and is processed only for that purpose).
 
 11.2 Personal Data in routine backups will be deleted in line with the backup cycle (no longer than {{90}} days) and stays protected until then.
 
-11.3 Where Northbound works in Client's tenant, Client controls retention of data in that environment. Northbound will remove its own copies and revoke its access on completion.
+11.3 Where Consultant works in Client's tenant, Client controls retention of data in that environment. Consultant will remove its own copies and revoke its access on completion.
 
 ## 12. AI services
 
-12.1 Northbound will not use Personal Data to train or fine-tune AI models of its own or of third parties, and will configure AI services used in the Services so that Personal Data is not used for provider model training, where such a setting is available (see MSA clause 9.1).
+12.1 Consultant will not use Personal Data to train or fine-tune AI models of its own or of third parties, and will configure AI services used in the Services so that Personal Data is not used for provider model training, where such a setting is available (see MSA clause 9.1).
 
 12.2 Where a SOW involves processing Personal Data with AI services, the AI service, region and data-retention settings are listed in **Annex 3**.
 
@@ -121,7 +121,7 @@ Northbound will ensure that persons authorised to process Personal Data are boun
 
 ## 13. US state privacy law
 
-To the extent US state privacy laws apply, Northbound will: process Personal Data only to provide the Services and for the business purposes in this DPA; not sell or share Personal Data; not retain, use or disclose it outside the direct business relationship or for any other purpose; not combine it with other data except as permitted by law; notify Client if it can no longer meet its obligations; and allow Client to take reasonable steps to stop and remediate unauthorised use.
+To the extent US state privacy laws apply, Consultant will: process Personal Data only to provide the Services and for the business purposes in this DPA; not sell or share Personal Data; not retain, use or disclose it outside the direct business relationship or for any other purpose; not combine it with other data except as permitted by law; notify Client if it can no longer meet its obligations; and allow Client to take reasonable steps to stop and remediate unauthorised use.
 
 ## 14. Liability
 
@@ -129,7 +129,7 @@ The liability of each party under this DPA is subject to the limitations and exc
 
 ## 15. Term and general
 
-15.1 This DPA takes effect on the date of the last signature and continues for as long as Northbound processes Personal Data under the MSA, and after that until all Personal Data is returned or deleted.
+15.1 This DPA takes effect on the date of the last signature and continues for as long as Consultant processes Personal Data under the MSA, and after that until all Personal Data is returned or deleted.
 
 15.2 If Applicable Data Protection Law changes or a Supervisory Authority requires, the parties will negotiate in good faith to amend this DPA.
 
@@ -137,7 +137,7 @@ The liability of each party under this DPA is subject to the limitations and exc
 
 ## Signatures
 
-| | {{CLIENT_LEGAL_NAME}} | {{NORTHBOUND_LEGAL_NAME}} |
+| | {{CLIENT_LEGAL_NAME}} | {{COMPANY_LEGAL_NAME}} (trading as {{BRAND_NAME}}) |
 |---|---|---|
 | Name | | |
 | Title | | |
@@ -157,11 +157,11 @@ The liability of each party under this DPA is subject to the limitations and exc
 | Types of Personal Data | {{e.g. names, business email addresses, user IDs, application usage logs}} |
 | Special categories (if any) | {{None / list and justify}} |
 | Frequency | {{Continuous during engagement / one-off transfer}} |
-| Client's chosen environment | {{Client's Azure tenant, region / Northbound sandbox, region}} |
+| Client's chosen environment | {{Client's Azure tenant, region / Consultant sandbox, region}} |
 | Data source and production vs test | {{Masked sample / production extract}} |
 | Retention | Deleted within {{30}} days after the end of the Services, per section 11 |
 | Client contact for data protection | {{NAME, EMAIL}} |
-| Northbound contact for data protection | {{NAME, EMAIL}} |
+| Consultant contact for data protection | {{NAME, EMAIL}} |
 
 ## Annex 2: Technical and organisational measures
 
@@ -182,7 +182,7 @@ The liability of each party under this DPA is subject to the limitations and exc
 | Personnel | Background checks where permitted by law; confidentiality agreements; security and privacy training on joining and annually |
 | Sub-processors | Due diligence on security and privacy before engagement; written data-protection terms |
 | Incident response | Documented process; assessment, containment, notice per section 8; post-incident review |
-| Business continuity | Backups of Northbound's own project records; recovery tested {{annually}} |
+| Business continuity | Backups of Consultant's own project records; recovery tested {{annually}} |
 | Deletion | Secure deletion at end of engagement; certificate on request |
 | Physical | No client data stored on removable media or in paper form; office and remote-work security rules |
 
@@ -195,13 +195,13 @@ The liability of each party under this DPA is subject to the limitations and exc
 | {{Other tool}} | {{Purpose}} | {{Region}} | {{Mechanism}} |
 | {{Subcontractor name}} | {{Engineering support}} | {{Country}} | {{SCCs / adequacy}} |
 
-*List every third party that can access client Personal Data, including AI services and any subcontracted engineers. If an item is chosen and paid for by Client directly (for example the Client's own Azure subscription), say so: the provider is then Client's processor, not Northbound's Sub-processor.*
+*List every third party that can access client Personal Data, including AI services and any subcontracted engineers. If an item is chosen and paid for by Client directly (for example the Client's own Azure subscription), say so: the provider is then Client's processor, not Consultant's Sub-processor.*
 
 AI services in scope for Personal Data: {{service, model, region, retention and abuse-monitoring settings}}.
 
 ## Annex 4: Contacts for incidents
 
-| | Client | Northbound |
+| | Client | Consultant |
 |---|---|---|
 | Name and role | {{}} | {{}} |
 | Email | {{}} | {{}} |

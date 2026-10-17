@@ -4,7 +4,7 @@
 
 **SOW number:** {{SOW_NO}}
 **Date:** {{DATE}}
-**Governing agreement:** Master Services Agreement between {{NORTHBOUND_LEGAL_NAME}} ("Northbound") and {{CLIENT_LEGAL_NAME}} ("Client") dated {{MSA_DATE}}
+**Governing agreement:** Master Services Agreement between {{COMPANY_LEGAL_NAME}}, trading as {{BRAND_NAME}} ("Consultant"), and {{CLIENT_LEGAL_NAME}} ("Client") dated {{MSA_DATE}}
 **Proposed start date:** {{START_DATE}}  **Demo date:** {{START_DATE + 4 working days}}
 **Valid until:** {{DATE + 30 days}}
 
@@ -103,7 +103,7 @@ If access or data is not ready on day 1, the start date moves and the schedule s
 - **Invoicing:** {{50%}} on signature, {{50%}} on delivery of the demo and findings report. Payment terms per the MSA ({{30}} days).
 - **Cloud and model costs:** {{Client's Azure subscription / passed through at cost, estimated at up to {{AMOUNT}}}}. Not included in the fixed price.
 - **Fee credit:** The PoC fee is credited in full against the fees of a follow-on SOW (migration, build or AI add-on) signed within **30 days** of the demo.
-- **Cancellation and rescheduling:** Rescheduling with at least 5 business days' notice is free. With less notice, or if the start is delayed by Client for more than 10 business days, Northbound may reschedule on its next availability and charge the committed costs of the reserved team, up to {{25%}} of the fee.
+- **Cancellation and rescheduling:** Rescheduling with at least 5 business days' notice is free. With less notice, or if the start is delayed by Client for more than 10 business days, Consultant may reschedule on its next availability and charge the committed costs of the reserved team, up to {{25%}} of the fee.
 
 ## 8. Assumptions and Client responsibilities
 
@@ -111,14 +111,14 @@ If access or data is not ready on day 1, the start date moves and the schedule s
 - A named decision-maker and SME are available as in section 5, with answers within one business day.
 - Data provided is limited to the agreed sample, with sensitive and production personal data removed or masked (MSA clause 8.4) unless the parties agree otherwise in writing here: {{EXCEPTIONS}}.
 - Client has authority to share the code and data provided, including AI-generated code (MSA clause 6.5).
-- Required Azure subscriptions, quotas and AI model access (for example Azure OpenAI or Foundry deployments) are available or Northbound is given rights to create them in a sandbox. Model-quota delays may affect results.
+- Required Azure subscriptions, quotas and AI model access (for example Azure OpenAI or Foundry deployments) are available or Consultant is given rights to create them in a sandbox. Model-quota delays may affect results.
 - The PoC is built for demonstration. It is not production-ready, is not covered by the warranty or by a support commitment (this SOW overrides MSA clause 10.2 and clause 14 for the PoC), and should not be used with live data or live users.
 - Evaluation results depend on the sample data and may not be representative of production performance.
 - {{OTHER_ASSUMPTIONS}}
 
 ## 9. Data, security and AI use
 
-- Work is performed in {{Client's tenant / Northbound's sandbox tenant}}. If in Northbound's tenant, Client data is deleted within {{15}} days of the demo unless Client requests earlier or the parties proceed to a follow-on.
+- Work is performed in {{Client's tenant / Consultant's sandbox tenant}}. If in Consultant's tenant, Client data is deleted within {{15}} days of the demo unless Client requests earlier or the parties proceed to a follow-on.
 - Credentials are held in a secrets manager and revoked at close.
 - AI services are configured so that Client data is not used to train provider models (MSA clause 9.1). Approved tools for this PoC: {{e.g. Azure OpenAI / Foundry in the specified tenant, GitHub Copilot with training disabled, Claude Code with data retention disabled}}.
 - No security testing of Client systems is included without separate written authorisation.
@@ -128,23 +128,23 @@ If access or data is not ready on day 1, the start date moves and the schedule s
 IP follows MSA clause 6. For this PoC:
 
 - Client Materials remain Client's. 
-- PoC code is assigned to Client on payment, excluding Northbound Consultant Tools.
-- {{Optional: Northbound may reuse generic, non-client-specific learnings and tooling.}}
+- PoC code is assigned to Client on payment, excluding Consultant Tools.
+- {{Optional: Consultant may reuse generic, non-client-specific learnings and tooling.}}
 
 **Publicity (MSA clause 15.6).** *Client selects one; if none is ticked, no publicity applies.*
 
-- [ ] **Level 1, no publicity.** Northbound will not name Client or describe this engagement.
-- [ ] **Level 2, reference use.** Northbound may name Client and show its logo in customer lists and confidential proposals, and act as a reference.
-- [ ] **Level 3, case study.** As level 2, and Northbound may prepare a case study, published only after Client approves the final text, figures and quotes in writing.
-- [ ] **Anonymised use only.** Northbound may describe the engagement without identifying Client.
+- [ ] **Level 1, no publicity.** Consultant will not name Client or describe this engagement.
+- [ ] **Level 2, reference use.** Consultant may name Client and show its logo in customer lists and confidential proposals, and act as a reference.
+- [ ] **Level 3, case study.** As level 2, and Consultant may prepare a case study, published only after Client approves the final text, figures and quotes in writing.
+- [ ] **Anonymised use only.** Consultant may describe the engagement without identifying Client.
 
 Client's approver for publicity: {{NAME, TITLE, EMAIL}}. Consent may be withdrawn on {{30}} days' notice, as set out in the MSA.
 
 ## 11. Next steps and acceptance
 
-Sign below to confirm scope and fees. On signature Northbound will invoice the first instalment, issue an access checklist, and confirm the kickoff date.
+Sign below to confirm scope and fees. On signature Consultant will invoice the first instalment, issue an access checklist, and confirm the kickoff date.
 
-| | {{NORTHBOUND_LEGAL_NAME}} | {{CLIENT_LEGAL_NAME}} |
+| | {{COMPANY_LEGAL_NAME}} (trading as {{BRAND_NAME}}) | {{CLIENT_LEGAL_NAME}} |
 |---|---|---|
 | Name | | |
 | Title | | |
@@ -161,7 +161,7 @@ Sign below to confirm scope and fees. On signature Northbound will invoice the f
 - [ ] Architecture notes, README, or a 30-minute walkthrough from the original builder
 - [ ] Which AI tool created the prototype and any prompt history
 - [ ] Hosting and database details; copy of the schema; non-production data sample
-- [ ] Azure subscription or resource group with contributor access (or approval to use Northbound's sandbox)
+- [ ] Azure subscription or resource group with contributor access (or approval to use Consultant's sandbox)
 - [ ] AI model access or quota (Azure OpenAI / Foundry) if applicable
 - [ ] Authentication provider details (Entra ID tenant, test users)
 - [ ] Integration endpoints and test credentials

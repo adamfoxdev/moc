@@ -2,7 +2,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { randomBytes } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const defaultPath = resolve(here, '..', 'data', 'platform.db');
@@ -15,6 +15,10 @@ function newReference() {
   for (const b of bytes) out += ALPHABET[b % ALPHABET.length];
   return out;
 }
+
+// Only a hash of each edit code is stored, so a copy of the database cannot be used to change anyone's request.
+// (Codes issued before this change were stored as plain 48-character values; they are still accepted.)
+const hashToken = (t) => createHash('sha256').update(t).digest('hex');
 
 export const STATUSES = ['new', 'contacted', 'call-booked', 'working', 'closed'];
 
@@ -111,6 +115,7 @@ export function createStore(path = process.env.DB_PATH || defaultPath) {
   const expired = db.prepare(`SELECT id FROM requests WHERE updated_at < ? AND hold = 0 AND status != 'working'`);
   const insertAudit = db.prepare('INSERT INTO audit (at, actor, action, request_id, detail) VALUES (?, ?, ?, ?, ?)');
   const selectAudit = db.prepare('SELECT * FROM audit ORDER BY id DESC LIMIT ?');
+  const purgeAudit = db.prepare('DELETE FROM audit WHERE at < ?');
   const insertSession = db.prepare('INSERT INTO sessions (id_hash, email, name, csrf, created_at, last_seen, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?)');
   const selectSession = db.prepare('SELECT * FROM sessions WHERE id_hash = ?');
   const touchSession = db.prepare('UPDATE sessions SET last_seen = ? WHERE id_hash = ?');
@@ -165,11 +170,18 @@ export function createStore(path = process.env.DB_PATH || defaultPath) {
       const editToken = randomBytes(24).toString('hex');
       const now = new Date().toISOString();
       insert.run(id, now, now, answers.name, answers.email, answers.company || '', answers.goal,
-        JSON.stringify(answers), JSON.stringify(recommendation), editToken, now, noticeVersion);
+        JSON.stringify(answers), JSON.stringify(recommendation), hashToken(editToken), now, noticeVersion);
       return { id, editToken };
     },
     get: (id) => row(selectOne.get(id)) ?? null,
-    editTokenFor: (id) => selectOne.get(id)?.edit_token ?? null,
+    // Does this edit code belong to this request? `createdAt` is when the code was issued.
+    checkEditToken(id, given) {
+      const r = selectOne.get(id);
+      if (!r || typeof given !== 'string' || !given) return { ok: false };
+      const stored = r.edit_token;
+      const same = stored.length === 64 ? stored === hashToken(given) : stored === given;
+      return { ok: same, createdAt: r.created_at };
+    },
     list: () => selectAll.all().map(row),
     updateAnswers(id, answers, recommendation) {
       updateAnswers.run(new Date().toISOString(), answers.name, answers.email, answers.company || '',
@@ -200,6 +212,7 @@ export function createStore(path = process.env.DB_PATH || defaultPath) {
     touchSession: (idHash, now) => { touchSession.run(now, idHash); },
     deleteSession: (idHash) => { deleteSession.run(idHash); },
     purgeExpiredSessions: (now) => { purgeSessions.run(now); },
+    purgeAudit: (cutoff) => purgeAudit.run(cutoff.toISOString()).changes,
     auditList: (limit = 200) => selectAudit.all(limit).map(auditRow),
     auditFor: (requestId) => auditFor.all(requestId).map(auditRow),
     enqueueEmail({ kind, requestId, to, at = new Date() }) {

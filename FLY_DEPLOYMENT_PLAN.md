@@ -205,7 +205,7 @@ Five sites with different company names and looks run from the **same image**. E
 
 **Costs and effort scale with the count:** five machines, five volumes, five buckets, five email domains, five privacy notices to keep accurate. All five sites are operated by one company (`brands/_company.json`, currently Mock LLC), which is therefore the data controller for every site's enquiries and the party named in each privacy notice, while each brand is a trade name. Check with counsel: whether each trade name needs to be registered ("doing business as" filings), whether one company running five brands is the liability structure you want, and that contracts and notices name the company as well as the brand.
 
-**Not tested against real Fly:** the deploy scripts were tested with a stand-in `fly` that records its commands (every step, ordering, masking of secrets, re-runs, refusals), not with a real account. Unconfirmed: the `fly storage create --name … --yes` flags, that `fly deploy -c fly.<brand>.toml` finds the Dockerfile beside a differently named config (if not, add `--dockerfile Dockerfile`), and that `fly secrets set --stage` works before the first deploy. Run `setup` and `deploy` for one brand first. The brand switching itself is tested (90 automated tests, plus real-browser runs of all five brands with the Content-Security-Policy on).
+**Not tested against real Fly:** the deploy scripts were tested with a stand-in `fly` that records its commands (every step, ordering, masking of secrets, re-runs, refusals), not with a real account. Unconfirmed: the `fly storage create --name … --yes` flags, that `fly deploy -c fly.<brand>.toml` finds the Dockerfile beside a differently named config (if not, add `--dockerfile Dockerfile`), and that `fly secrets set --stage` works before the first deploy. Run `setup` and `deploy` for one brand first. The brand switching itself is tested (99 automated tests, plus real-browser runs of all five brands with the Content-Security-Policy on).
 
 ---
 
@@ -366,3 +366,10 @@ Plan a rehearsal on a staging app that exercises each of these before production
 - [ ] Uptime monitor and log alerts reach a person
 - [ ] Runbooks written; rollback rehearsed
 - [ ] Budget alert set
+
+
+## Monitoring, workflows and runbooks
+
+- `.github/workflows/uptime.yml` runs `scripts/check-sites.mjs` every 15 minutes; a failure shows as a failed run (turn on GitHub notifications for failed workflows).
+- `.github/workflows/platform.yml` deploys every `live` brand from `main`, one at a time, using a `FLY_API_TOKEN_<BRAND>` repository secret per brand. Untested against real GitHub and Fly until the first run.
+- `RUNBOOKS.md` covers outages, email, secret rotation, restore (including `restore-test`), data requests, breaches, rollback, staff changes and adding a brand.

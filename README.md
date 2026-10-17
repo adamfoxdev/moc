@@ -62,4 +62,4 @@ The "Get started" buttons on the site (header, hero, contact) lead to the onboar
 | `PRIVACY_NOTICE.md` | Draft privacy notice (public text, notes and questions for counsel, product gaps). The platform's `/privacy` page is generated from it |
 | `CASE_STUDY_TEMPLATE.md` | Case study template, interview guide and publication approval checklist |
 
-The legal documents are drafts for lawyer review. Defined terms, numbers (warranty 30 days, breach notice 72 hours, payment 30 days, rate card, 30-day fee credit) and clause cross-references are meant to agree across them; change them together.
+The legal documents are drafts for lawyer review. They are written for **one company operating several brands**: the contracting party is `{{COMPANY_LEGAL_NAME}}` (expected to be Mock LLC; confirm the exact registered name) *trading as* `{{BRAND_NAME}}`, and the party is called "Consultant" throughout ("the Company" in the NDA and AI policy). Defined terms, numbers (warranty 30 days, breach notice 72 hours, payment 30 days, rate card, 30-day fee credit) and clause cross-references are meant to agree across them; change them together.

@@ -1,10 +1,12 @@
 # Mutual Non-Disclosure Agreement
 
-> **Draft for legal review.** This is a starting-point template, not legal advice. Have a lawyer qualified in the governing jurisdiction review it before use. Replace every `{{PLACEHOLDER}}` and delete this note. Use this NDA before a Master Services Agreement is signed (for example, for the initial assessment call or a code review); once an MSA is in force, its section 7 governs and this NDA can be referenced or superseded as set out in section 10.
+> **Draft for legal review.** This is a starting-point template, not legal advice. Have a lawyer qualified in the governing jurisdiction review it before use. Replace every `{{PLACEHOLDER}}` and delete this note. The Company is the legal entity that operates every brand ({{COMPANY_LEGAL_NAME}}, expected to be Mock LLC; confirm the exact name), trading under the brand the prospect dealt with.
+>
+> Use this NDA before a Master Services Agreement is signed (for example, for the initial assessment call or a code review); once an MSA is in force, its section 7 governs and this NDA can be referenced or superseded as set out in section 10.
 
 This Mutual Non-Disclosure Agreement (the "**Agreement**") is made on {{DATE}} (the "**Effective Date**") between:
 
-**{{NORTHBOUND_LEGAL_NAME}}**, a {{ENTITY_TYPE}} registered in {{JURISDICTION}} under number {{REG_NO}}, with its registered office at {{ADDRESS}} ("**Northbound**"); and
+**{{COMPANY_LEGAL_NAME}}**, a {{ENTITY_TYPE}} registered in {{JURISDICTION}} under number {{REG_NO}}, with its registered office at {{ADDRESS}}, trading as **{{BRAND_NAME}}** ("**the Company**"); and
 
 **{{COUNTERPARTY_LEGAL_NAME}}**, a {{ENTITY_TYPE}} registered in {{JURISDICTION}} under number {{REG_NO}}, with its registered office at {{ADDRESS}} (the "**Counterparty**").
 
@@ -106,7 +108,7 @@ The parties agree that unauthorised use or disclosure may cause irreparable harm
 
 ## Signatures
 
-| | {{NORTHBOUND_LEGAL_NAME}} | {{COUNTERPARTY_LEGAL_NAME}} |
+| | {{COMPANY_LEGAL_NAME}} (trading as {{BRAND_NAME}}) | {{COUNTERPARTY_LEGAL_NAME}} |
 |---|---|---|
 | Name | | |
 | Title | | |
@@ -117,7 +119,7 @@ The parties agree that unauthorised use or disclosure may cause irreparable harm
 
 ## Drafting notes (delete before sending)
 
-- **Mutual vs one-way.** This is mutual because most prospects will share code, data and business plans, and Northbound will share methods and pricing. If a prospect insists on one-way, make sure your own tooling, pricing and methods remain protected another way.
+- **Mutual vs one-way.** This is mutual because most prospects will share code, data and business plans, and the Company will share methods and pricing. If a prospect insists on one-way, make sure your own tooling, pricing and methods remain protected another way.
 - **Terms to confirm:** disclosure period (two years), tail (five years), return period, governing law and forum. Align with the MSA (`MSA.md` section 7, five-year tail; trade secrets and client data protected as long as they remain confidential).
 - **AI clause (3.5).** Prospects may expect you to use AI coding tools on their code. State clearly in the MSA or SOW which tools and configurations are approved (for example Azure OpenAI in the client's tenant, with no training on client data) so this NDA is not breached by normal working practice.
 - **Regulated clients** may require their own form of NDA. Compare against this one for term, residuals, and compelled-disclosure language.

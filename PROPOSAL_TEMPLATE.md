@@ -1,7 +1,7 @@
 # Proposal: {{PROJECT_NAME}}
 
 **Prepared for:** {{CLIENT_NAME}}, {{CLIENT_CONTACT_NAME}} ({{CLIENT_CONTACT_TITLE}})
-**Prepared by:** Northbound Consulting, {{LEAD_NAME}}
+**Prepared by:** {{BRAND_NAME}} (operated by {{COMPANY_LEGAL_NAME}}), {{LEAD_NAME}}
 **Date:** {{DATE}}  **Valid until:** {{DATE + 30 days}}
 **Reference:** {{PROPOSAL_ID}}
 
@@ -137,8 +137,8 @@ If an assumption proves false, we will raise it promptly and agree any change in
 
 - Work happens in {{client tenant / our tenant}}; credentials are held in a secrets manager and revoked at close.
 - Client data is used only for this engagement and deleted or returned at close, unless agreed otherwise.
-- Northbound does not use Client data to train its own models, and configures AI services so Client data is not used to train provider models where the provider offers that setting (the default for Azure OpenAI). See the MSA, clause 9.1.
-- Ownership: {{deliverables become the client's property on payment; pre-existing Northbound tooling remains ours and is licensed for use with the deliverables}}.
+- {{BRAND_NAME}} does not use Client data to train its own models, and configures AI services so Client data is not used to train provider models where the provider offers that setting (the default for Azure OpenAI). See the MSA, clause 9.1.
+- Ownership: {{deliverables become the client's property on payment; pre-existing {{BRAND_NAME}} tooling remains ours and is licensed for use with the deliverables}}.
 - Confidentiality is governed by {{NDA reference / MSA clause}}.
 
 ## 13. Warranty and support
@@ -147,7 +147,7 @@ If an assumption proves false, we will raise it promptly and agree any change in
 - Post-launch support options are in section 4, Option C.
 - AI output quality is measured against the evaluation set agreed in section 5; we do not warrant that a model will be error-free.
 
-## 14. Why Northbound
+## 14. Why {{BRAND_NAME}}
 
 - 25 years of delivery across global industries and verticals.
 - A defined route from prototype to production to supported service.
@@ -166,7 +166,7 @@ If an assumption proves false, we will raise it promptly and agree any change in
 
 This proposal, together with {{MSA / terms reference}}, forms the agreement between the parties.
 
-| | Northbound Consulting | {{CLIENT_NAME}} |
+| | {{COMPANY_LEGAL_NAME}} (trading as {{BRAND_NAME}}) | {{CLIENT_NAME}} |
 |---|---|---|
 | Name | | |
 | Title | | |

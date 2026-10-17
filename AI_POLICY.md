@@ -2,13 +2,13 @@
 
 **Owner:** {{POLICY_OWNER, e.g. Managing Principal}}  **Version:** 0.1 draft  **Effective:** {{DATE}}  **Review:** every 6 months, and whenever a tool, provider term or law changes
 
-> **Draft.** This is an internal policy template. Replace every `{{PLACEHOLDER}}`, check the tool list against what Northbound really licenses and how each tool is really configured, and have counsel review the sections on client data and regulation. Keep it truthful: this policy is referenced by `NDA.md` (section 3.5), `MSA.md` (section 9), `DPA.md` (section 12 and Annex 3) and `SOW_POC.md` (section 9), so what it says is what clients will rely on. Delete this note before issuing.
+> **Draft.** This is an internal policy template. Replace every `{{PLACEHOLDER}}`, check the tool list against what the Company really licenses and how each tool is really configured, and have counsel review the sections on client data and regulation. Keep it truthful: this policy is referenced by `NDA.md` (section 3.5), `MSA.md` (section 9), `DPA.md` (section 12 and Annex 3) and `SOW_POC.md` (section 9), so what it says is what clients will rely on. Delete this note before issuing.
 
 ## 1. Purpose and scope
 
-Northbound builds with AI, migrates AI-generated code, and adds AI to client systems. This policy sets how our people use AI tools so that we protect client data, ship dependable work, and can tell clients exactly what we do.
+{{COMPANY_LEGAL_NAME}} (the "**Company**", expected to be Mock LLC) operates several brands, each offering some mix of taking AI-built apps to production, AI solutions, data management, cloud and hosting, and support. This policy applies to all of them equally. The Company builds with AI, migrates AI-generated code, and adds AI to client systems. This policy sets how our people use AI tools so that we protect client data, ship dependable work, and can tell clients exactly what we do.
 
-It applies to all Northbound employees, contractors and subcontractors ("**personnel**") using AI tools for any work involving client or Northbound information. It covers coding assistants and agents, chat assistants, meeting tools, model APIs, automation tools, and any new AI capability embedded in other software.
+It applies to all employees, contractors and subcontractors of the Company and every one of its brands ("**personnel**") using AI tools for any work involving client or Company information. It covers coding assistants and agents, chat assistants, meeting tools, model APIs, automation tools, and any new AI capability embedded in other software.
 
 ## 2. Principles
 
@@ -22,7 +22,7 @@ It applies to all Northbound employees, contractors and subcontractors ("**perso
 
 | Tier | Meaning | Client confidential data | Personal data |
 |---|---|---|---|
-| **Approved** | Reviewed, licensed by Northbound, configured per section 4 | Yes, within the client's authorisation (section 5) | Only if the DPA names the tool in Annex 3 |
+| **Approved** | Reviewed, licensed by the Company, configured per section 4 | Yes, within the client's authorisation (section 5) | Only if the DPA names the tool in Annex 3 |
 | **Client-provided** | Tool or tenant supplied by the client (for example their Azure OpenAI) | Yes, under the client's terms | Under the DPA |
 | **Restricted** | Allowed only with prior written approval from the Policy Owner for a specific use | Case by case | No |
 | **Prohibited** | Not to be used for work | No | No |
@@ -31,10 +31,10 @@ It applies to all Northbound employees, contractors and subcontractors ("**perso
 
 | Tool | Use | Required configuration |
 |---|---|---|
-| {{Azure OpenAI / Azure AI Foundry}} in a Northbound or client tenant | Model API for prototypes and features | Region set per client; abuse-monitoring data-retention reviewed; no training on data (default for Azure); managed identity; no public endpoints where practical |
+| {{Azure OpenAI / Azure AI Foundry}} in a Company or client tenant | Model API for prototypes and features | Region set per client; abuse-monitoring data-retention reviewed; no training on data (default for Azure); managed identity; no public endpoints where practical |
 | {{GitHub Copilot Business/Enterprise}} | Coding assistant | Business tier; prompts and suggestions excluded from model training; public-code match filtering on; content exclusion for client secrets and config |
 | {{Claude Code / Claude for Work}} | Coding agent and assistant | Commercial or team plan with training and retention terms that exclude use for model training; agent permissions per section 7 |
-| {{Microsoft 365 Copilot}} | Documents, email, meetings internal to Northbound | Tenant-governed; sensitivity labels honoured |
+| {{Microsoft 365 Copilot}} | Documents, email, meetings internal to the Company | Tenant-governed; sensitivity labels honoured |
 | {{Other tool}} | {{Use}} | {{Configuration}} |
 
 ### 3.2 Restricted examples
@@ -181,7 +181,7 @@ Standards for LLM add-ons, agents and AI platforms we deliver:
 
 ## Appendix C: Client disclosure wording (for SOW or onboarding)
 
-> Northbound uses the following AI tools in delivering the Services: {{TOOL LIST}}. These are used under commercial terms, configured so that your data is not used to train provider models, and operated under Northbound's AI Acceptable-Use and Tooling Policy. All AI-assisted output is reviewed by a Northbound engineer before delivery. Please tell us before kickoff if you want any of these tools excluded or restricted for your project.
+> {{BRAND_NAME}}, operated by {{COMPANY_LEGAL_NAME}}, uses the following AI tools in delivering the Services: {{TOOL LIST}}. These are used under commercial terms, configured so that your data is not used to train provider models, and operated under our AI Acceptable-Use and Tooling Policy. All AI-assisted output is reviewed by one of our engineers before delivery. Please tell us before kickoff if you want any of these tools excluded or restricted for your project.
 
 ## Drafting notes (delete before issuing)
 

@@ -3,11 +3,35 @@
   "volume": "northbound_data",
   "volumeSizeGb": 1,
   "brands": {
-    "northbound":   { "app": "moc-yytcxa",       "url": "https://moc-yytcxa.fly.dev" },
-    "landing-gear": { "app": "moc-landing-gear", "url": "https://moc-landing-gear.fly.dev" },
-    "steadfast":    { "app": "moc-steadfast",    "url": "https://moc-steadfast.fly.dev" },
-    "voltage":      { "app": "moc-voltage",      "url": "https://moc-voltage.fly.dev" },
-    "steward":      { "app": "moc-steward",      "url": "https://moc-steward.fly.dev" },
-    "anchorpoint":  { "app": "moc-anchorpoint",  "url": "https://moc-anchorpoint.fly.dev" }
+    "northbound": {
+      "app": "moc-yytcxa",
+      "url": "https://moc-yytcxa.fly.dev",
+      "live": true
+    },
+    "landing-gear": {
+      "app": "moc-landing-gear",
+      "url": "https://moc-landing-gear.fly.dev",
+      "live": true
+    },
+    "steadfast": {
+      "app": "moc-steadfast",
+      "url": "https://moc-steadfast.fly.dev",
+      "live": true
+    },
+    "voltage": {
+      "app": "moc-voltage",
+      "url": "https://moc-voltage.fly.dev",
+      "live": true
+    },
+    "steward": {
+      "app": "moc-steward",
+      "url": "https://moc-steward.fly.dev",
+      "live": true
+    },
+    "anchorpoint": {
+      "app": "moc-anchorpoint",
+      "url": "https://moc-anchorpoint.fly.dev",
+      "live": true
+    }
   }
 }

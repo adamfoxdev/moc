@@ -1,10 +1,12 @@
 # Master Services Agreement
 
+> **One company, several brands.** The contracting party is the company that operates every brand ({{COMPANY_LEGAL_NAME}}, currently expected to be Mock LLC: confirm its exact registered name), **trading as** the brand the client dealt with ({{BRAND_NAME}}). The brand is a trade name, not a separate legal entity: the client's contract, liability and data-protection relationship are with the company. Check that each trade name is registered where required (a "doing business as" or fictitious-name filing) before it appears on a contract.
+>
 > **Draft for legal review.** This is a starting-point template, not legal advice. Have a lawyer qualified in the governing jurisdiction review and adapt it before use, particularly sections 8 to 11 (warranty, liability, indemnity), data protection, and anything specific to regulated industries. Replace every `{{PLACEHOLDER}}`. Delete this note before sending.
 
 This Master Services Agreement (the "**Agreement**") is made on {{DATE}} (the "**Effective Date**") between:
 
-**{{NORTHBOUND_LEGAL_NAME}}**, a {{ENTITY_TYPE}} registered in {{JURISDICTION}} under number {{REG_NO}}, with its registered office at {{ADDRESS}} ("**Consultant**" or "**Northbound**"); and
+**{{COMPANY_LEGAL_NAME}}**, a {{ENTITY_TYPE}} registered in {{JURISDICTION}} under number {{REG_NO}}, with its registered office at {{ADDRESS}}, trading as **{{BRAND_NAME}}** ("**Consultant**"); and
 
 **{{CLIENT_LEGAL_NAME}}**, a {{ENTITY_TYPE}} registered in {{JURISDICTION}} under number {{REG_NO}}, with its registered office at {{ADDRESS}} ("**Client**").
 
@@ -211,7 +213,7 @@ If the parties agree on a support subscription, the SOW will specify covered app
 
 ## Signatures
 
-| | {{NORTHBOUND_LEGAL_NAME}} | {{CLIENT_LEGAL_NAME}} |
+| | {{COMPANY_LEGAL_NAME}} (trading as {{BRAND_NAME}}) | {{CLIENT_LEGAL_NAME}} |
 |---|---|---|
 | Name | | |
 | Title | | |

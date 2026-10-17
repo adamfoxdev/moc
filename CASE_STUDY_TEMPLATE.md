@@ -185,7 +185,7 @@ If the client will not be named:
 - [ ] AI claims reflect the evaluation actually run, with its limits stated
 - [ ] Technology and third-party names used accurately; no implication of endorsement by Microsoft or others
 - [ ] Quote reviewed and approved in writing by the person quoted
-- [ ] Northbound lead and Policy Owner sign-off
+- [ ] Brand lead and Policy Owner sign-off
 - [ ] Client has a right to withdraw; process documented: {{how to unpublish within X days}}
 - [ ] Dated, with a review date ({{12 months}}) so stale results are retired
 
