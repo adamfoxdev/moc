@@ -121,6 +121,53 @@ fly logs                                                  # no "ERROR" lines fro
 fly certs add onboarding.example.com                      # then add the DNS records it prints
 ```
 
+### The same steps in Windows PowerShell
+
+The bash block above uses `$(openssl …)`, which does not work in PowerShell. Run these from `C:\moc\moc\platform`, replacing `<app>` with your app name (it must be unique across Fly) and the other `<…>` values:
+
+```powershell
+# 0. One-off: install the Fly CLI, then open a new PowerShell window and sign in
+iwr https://fly.io/install.ps1 -useb | iex
+fly auth login
+
+# 1. Edit fly.toml first: app, primary_region, and PUBLIC_URL = "https://<app>.fly.dev"
+notepad fly.toml
+
+# 2. App, volume and backup bucket
+fly apps create <app>
+fly volumes create northbound_data --app <app> --region lhr --size 1
+fly storage create --app <app>          # sets BUCKET_NAME, AWS_* secrets for you
+
+# 3. A fresh SESSION_SECRET (keep this output private; use it in the next command)
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+
+# 4. Secrets (double quotes keep spaces and < > intact)
+fly secrets set --app <app> `
+  "OIDC_ISSUER=https://accounts.google.com" `
+  "OIDC_CLIENT_ID=<id>.apps.googleusercontent.com" `
+  "OIDC_CLIENT_SECRET=<secret>" `
+  "ADMIN_EMAILS=you@gmail.com,colleague@gmail.com" `
+  "SESSION_SECRET=<value from step 3>" `
+  "MAIL_API_KEY=<resend or postmark key>" `
+  "MAIL_FROM=Northbound <onboarding@resend.dev>" `
+  "MAIL_REPLY_TO=you@gmail.com" `
+  "NOTIFY_TO=you@gmail.com"
+
+# 5. Deploy exactly one machine
+fly deploy --ha=false
+
+# 6. Check
+fly status --app <app>
+curl.exe https://<app>.fly.dev/api/ready
+fly logs --app <app>
+```
+
+Before step 5, add `https://<app>.fly.dev/auth/callback` as an authorized redirect URI on your Google OAuth client.
+
+**First test without a verified email domain:** Resend's test sender (`onboarding@resend.dev`) can only send to the email address of your Resend account, so for a first end-to-end test use that same address for `NOTIFY_TO`, `MAIL_REPLY_TO`, and as the "customer" email you type into the form. Verify a real domain (SPF/DKIM records) before inviting anyone else to use the form.
+
+**What a healthy start looks like in `fly logs`:** `Admin: staff sign-in via https://accounts.google.com`, `Email: sending via resend`, and no lines containing `level=ERROR`. If the app exits straight away, the log starts with `Refusing to start in production:` followed by the exact settings to fix.
+
 Then:
 
 1. **Email domain:** add the SPF and DKIM records your provider shows, and a DMARC record (start with `p=none`, move to `quarantine` after a few clean weeks). Send a real test; check the headers show SPF, DKIM and DMARC passing and the message reaches the inbox.
