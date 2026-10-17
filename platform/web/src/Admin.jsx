@@ -6,12 +6,23 @@ const TOKEN_KEY = 'northbound-admin-token';
 const readToken = () => { try { return sessionStorage.getItem(TOKEN_KEY) || ''; } catch { return ''; } };
 const writeToken = (t) => { try { t ? sessionStorage.setItem(TOKEN_KEY, t) : sessionStorage.removeItem(TOKEN_KEY); } catch { /* ignore */ } };
 
+const EMAIL_KIND = { confirmation: 'Confirmation to customer', 'team-new': 'Alert to team', 'team-update': 'Update alert to team' };
 const when = (iso) => new Date(iso).toLocaleString();
 
 function Detail({ r, statuses, token, onSaved }) {
   const [status, setStatus] = useState(r.status);
   const [notes, setNotes] = useState(r.notes);
   const [msg, setMsg] = useState('');
+  const [emails, setEmails] = useState(null);
+  const loadEmails = useCallback(() => {
+    admin.get(token, r.id).then((d) => setEmails(d.emails)).catch(() => setEmails([]));
+  }, [token, r.id]);
+  useEffect(() => { setEmails(null); loadEmails(); }, [loadEmails]);
+
+  async function retry(id) {
+    try { await admin.retryEmail(token, id); setTimeout(loadEmails, 1500); setMsg('Retrying…'); }
+    catch (e) { setMsg(e.message); }
+  }
   // Reset the form only when a different request is opened, not after our own save.
   useEffect(() => { setStatus(r.status); setNotes(r.notes); setMsg(''); }, [r.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -38,6 +49,23 @@ function Detail({ r, statuses, token, onSaved }) {
       <h3>First read we showed them</h3>
       <ul>{r.recommendation.paths.map((p) => <li key={p.id}><strong>{p.title}</strong></li>)}</ul>
       {r.recommendation.flags.map((f) => <p className="note" key={f}>{f}</p>)}
+      <h3>Emails</h3>
+      {emails === null ? <p className="muted small">Loading…</p> : emails.length === 0 ? (
+        <p className="muted small">No emails queued for this request.</p>
+      ) : (
+        <ul className="emails">
+          {emails.map((e) => (
+            <li key={e.id}>
+              <span className={`pill ${e.status}`}>{e.status}</span>{' '}
+              {EMAIL_KIND[e.kind] || e.kind} <span className="muted">to {e.to}</span>
+              {e.status === 'sent' && <span className="muted small"> · {when(e.sentAt)}</span>}
+              {e.status === 'pending' && e.attempts > 0 && <span className="muted small"> · attempt {e.attempts} failed, next {when(e.nextAttemptAt)}</span>}
+              {e.lastError && e.status !== 'sent' && <div className="small error">{e.lastError}</div>}
+              {e.status === 'failed' && <button className="link small" onClick={() => retry(e.id)}>Retry</button>}
+            </li>
+          ))}
+        </ul>
+      )}
       <h3>Your follow-up</h3>
       <div className="row">
         <label className="field">Status

@@ -88,3 +88,8 @@ footer.fine { padding-bottom: 32px; }
 .detail dt { color:var(--muted); font-size:13px; }
 .detail dd { margin:0; }
 .quote { white-space: pre-wrap; background:var(--bg2); border-radius:8px; padding:12px; }
+
+.emails { list-style:none; padding:0; margin:0 0 8px; display:grid; gap:8px; font-size:14px; }
+.pill { display:inline-block; font-size:12px; border-radius:99px; padding:0 8px; border:1px solid var(--line); }
+.pill.sent { color:var(--accent); border-color:var(--accent); }
+.pill.failed { color:var(--err); border-color:var(--err); }

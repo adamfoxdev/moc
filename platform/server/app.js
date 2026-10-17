@@ -15,6 +15,7 @@ const safeEqual = (a, b) => timingSafeEqual(digest(a), digest(b));
 
 export function createApp({
   store,
+  notifier = null,
   adminToken = process.env.ADMIN_TOKEN,
   maxSubmissions = 5,
   windowMs = 15 * 60 * 1000,
@@ -46,6 +47,9 @@ export function createApp({
     return false;
   };
 
+  // Notification problems must never fail or slow a customer's request.
+  const safely = (fn) => { try { fn(); } catch (e) { console.error('notification', e); } };
+
   const publicView = (r) => ({ reference: r.id, name: r.name, answers: r.answers, recommendation: r.recommendation });
 
   app.get('/api/health', (_req, res) => res.json({ ok: true }));
@@ -63,6 +67,7 @@ export function createApp({
     if (!ok) return res.status(400).json({ errors });
     const recommendation = recommend(value);
     const { id, editToken } = store.create(value, recommendation);
+    safely(() => notifier?.requestCreated({ id, email: value.email }));
     res.status(201).json({ reference: id, editToken, recommendation });
   });
 
@@ -79,6 +84,7 @@ export function createApp({
     const merged = { ...current.answers, ...value };
     const recommendation = recommend(merged);
     store.updateAnswers(req.params.id, merged, recommendation);
+    safely(() => notifier?.requestUpdated(req.params.id));
     res.json({ reference: req.params.id, recommendation });
   });
 
@@ -100,7 +106,13 @@ export function createApp({
   admin.get('/requests/:id', (req, res) => {
     const r = store.get(req.params.id);
     if (!r) return res.status(404).json({ error: 'Not found.' });
-    res.json(r);
+    res.json({ ...r, emails: store.emailsFor(r.id) });
+  });
+  admin.post('/emails/:id/retry', (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || !store.retryEmail(id)) return res.status(404).json({ error: 'No failed email with that id.' });
+    safely(() => notifier?.kick?.());
+    res.json({ ok: true });
   });
   admin.patch('/requests/:id', (req, res) => {
     const { ok, errors, value } = validateAdminUpdate(req.body, STATUSES);

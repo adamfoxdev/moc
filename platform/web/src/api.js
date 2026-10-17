@@ -21,6 +21,8 @@ export const saveDetails = (id, token, body) =>
 
 export const admin = {
   list: (token) => request('/api/admin/requests', { headers: { 'x-admin-token': token } }),
+  get: (token, id) => request(`/api/admin/requests/${id}`, { headers: { 'x-admin-token': token } }),
+  retryEmail: (token, id) => request(`/api/admin/emails/${id}/retry`, { method: 'POST', headers: { 'x-admin-token': token } }),
   update: (token, id, body) =>
     request(`/api/admin/requests/${id}`, { method: 'PATCH', body, headers: { 'x-admin-token': token } }),
 };
