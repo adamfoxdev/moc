@@ -47,6 +47,7 @@ IT consulting firm that takes vibe-coded PoCs and MVPs to production and keeps t
 | File | Purpose |
 |---|---|
 | `index.html` | Marketing website |
+| `platform/` | Customer onboarding site (React) with an API and local SQLite database; see `platform/README.md` |
 | `PRICING.md` | Draft pricing tiers for every service, and bundles |
 | `PROPOSAL_TEMPLATE.md` | Client proposal template |
 | `NDA.md` | Mutual non-disclosure agreement (pre-contract) |
