@@ -54,5 +54,6 @@ IT consulting firm that takes vibe-coded PoCs and MVPs to production and keeps t
 | `SOW_POC.md` | Statement of work for the 1-week PoC |
 | `DPA.md` | Data processing agreement (when personal data is processed) |
 | `AI_POLICY.md` | Internal AI acceptable-use and tooling policy |
+| `CASE_STUDY_TEMPLATE.md` | Case study template, interview guide and publication approval checklist |
 
 The legal documents are drafts for lawyer review. Defined terms, numbers (warranty 30 days, breach notice 72 hours, payment 30 days, rate card, 30-day fee credit) and clause cross-references are meant to agree across them; change them together.
