@@ -27,6 +27,7 @@ ENV NODE_ENV=production PORT=8080 DB_PATH=/data/platform.db
 COPY --from=build /app/package.json ./
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/server ./server
+COPY --from=build /app/brands ./brands
 COPY --from=build /app/dist ./dist
 # server/notice.js reads this at runtime to fingerprint the privacy notice.
 COPY --from=build /app/web/src/privacy-notice.md ./web/src/privacy-notice.md

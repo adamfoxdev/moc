@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { saveDetails, downloadMine, deleteMine } from './api.js';
+import { useBrand } from './brand.jsx';
 import { TextInput, TextArea, Select } from './fields.jsx';
 import { Choice } from './fields.jsx';
 import { STAGE, BUILT_WITH, TEAM, HELP_WITH, USERS, DATA, TIMING, CONTACT } from './options.js';
@@ -133,13 +134,14 @@ function YourData({ state, onDeleted }) {
 }
 
 export default function Result({ state, onUpdated, onReset, onDeleted }) {
+  const brand = useBrand();
   const first = (state.name || '').split(' ')[0];
   const { recommendation } = state;
   return (
     <div className="result">
       <p className="ref">Reference <strong>{state.reference}</strong></p>
       <h1>Thanks{first ? `, ${first}` : ''}. Here's our first read.</h1>
-      <p className="lead">This is based on what you've told us so far. A person at Northbound will read your request and reply properly.</p>
+      <p className="lead">This is based on what you've told us so far. A person at {brand.name} will read your request and reply properly.</p>
 
       <Paths recommendation={recommendation} />
 
@@ -155,7 +157,7 @@ export default function Result({ state, onUpdated, onReset, onDeleted }) {
       <section className="next">
         <h2>What happens next</h2>
         <ol>
-          <li>A person at Northbound reads this and replies by email within one business day.</li>
+          <li>A person at {brand.name} reads this and replies by email within one business day.</li>
           <li>If it helps, we'll suggest a 30-minute call. No preparation needed.</li>
           <li>There's nothing to sign or pay to find out whether we can help.</li>
         </ol>

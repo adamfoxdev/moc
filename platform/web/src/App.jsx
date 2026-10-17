@@ -3,25 +3,29 @@ import Intake from './Intake.jsx';
 import Result from './Result.jsx';
 import Admin from './Admin.jsx';
 import Privacy from './Privacy.jsx';
+import Preview from './Preview.jsx';
 import { getRequest, session } from './api.js';
+import { useBrand, Wordmark } from './brand.jsx';
 
 function Shell({ children }) {
+  const brand = useBrand();
   return (
-    <>
+    <div className={`header-${brand.header}`}>
       <header className="top">
         <div className="wrap bar">
-          <a className="logo" href="/">North<span>bound</span></a>
+          <a className="logo" href="/"><Wordmark brand={brand} /></a>
         </div>
       </header>
       <main className="wrap">{children}</main>
       <footer className="wrap fine">
-        Northbound Consulting. Placeholder name; replace before launch. · <a href="/privacy">Privacy Notice</a>
+        {brand.footer}{brand.placeholder && '. Placeholder name; replace before launch'} · <a href="/privacy">Privacy Notice</a>
       </footer>
-    </>
+    </div>
   );
 }
 
 function Customer() {
+  const brand = useBrand();
   const [state, setState] = useState(null);
   const [deleted, setDeleted] = useState(false);
   const [restoring, setRestoring] = useState(() => !!session.load());
@@ -56,19 +60,16 @@ function Customer() {
   }
 
   return (
-    <div className="hero">
-      <div>
-        <p className="eyebrow">Let's start with you</p>
-        <h1>Tell us what you're working on. We'll tell you how we can help.</h1>
-        <p className="lead">
-          Whether it's a prototype that needs to grow up, an idea you want to test, or AI you'd like inside the
-          systems you already run: two minutes here and you'll get our first read straight away.
-        </p>
-        <ul className="points">
-          <li>We read every request ourselves.</li>
-          <li>If the honest answer is that you don't need us, we'll say so.</li>
-          <li>Nothing to sign, and nothing to pay, to find out.</li>
-        </ul>
+    <div className={`hero layout-${brand.layout}`}>
+      <div className="hero-copy">
+        {brand.copy.eyebrow && <p className="eyebrow">{brand.copy.eyebrow}</p>}
+        <h1>{brand.copy.headline}</h1>
+        <p className="lead">{brand.copy.lead}</p>
+        {brand.copy.points.length > 0 && (
+          <ul className="points">
+            {brand.copy.points.map((p) => <li key={p}>{p}</li>)}
+          </ul>
+        )}
       </div>
       <Intake onCreated={update} />
     </div>
@@ -77,5 +78,10 @@ function Customer() {
 
 export default function App() {
   const path = window.location.pathname.replace(/\/$/, '');
-  return <Shell>{path === '/admin' ? <Admin /> : path === '/privacy' ? <Privacy /> : <Customer />}</Shell>;
+  return (
+    <>
+      <Shell>{path === '/admin' ? <Admin /> : path === '/privacy' ? <Privacy /> : <Customer />}</Shell>
+      <Preview />
+    </>
+  );
 }

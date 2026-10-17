@@ -6,8 +6,9 @@ import { fileURLToPath } from 'node:url';
 import { validateAnswers, validateAdminUpdate } from './validate.js';
 import { recommend } from './recommend.js';
 import { STATUSES } from './db.js';
-import { noticeVersion as currentNoticeVersion } from './notice.js';
-import { createAuth, authConfigFromEnv } from './auth.js';
+import { renderNotice } from './notice.js';
+import { loadBrand, listBrands, publicBrand, brandCss, faviconSvg, LAYOUTS } from './brand.js';
+import { createAuth, authConfigFromEnv, parseCookies } from './auth.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const dist = join(here, '..', 'dist');
@@ -18,7 +19,9 @@ const safeEqual = (a, b) => timingSafeEqual(digest(a), digest(b));
 export function createApp({
   store,
   notifier = null,
-  noticeVersion = currentNoticeVersion(),
+  brand = loadBrand(process.env.BRAND || 'northbound'),
+  noticeVersion,
+  brandPreview = process.env.BRAND_PREVIEW === 'true',
   adminToken = process.env.ADMIN_TOKEN,
   maxSubmissions = 5,
   windowMs = 15 * 60 * 1000,
@@ -30,6 +33,28 @@ export function createApp({
 } = {}) {
   const app = express();
   app.disable('x-powered-by');
+
+  // One build serves every brand: the name, colours, fonts, layout and wording come from the brand's file.
+  const notice = renderNotice(brand);
+  noticeVersion = noticeVersion ?? notice.version;
+
+  // Design preview (development only, explicitly enabled): a cookie picks a different brand and/or layout for
+  // that browser, and brand files are re-read on every request so edits show up on refresh.
+  const brandFor = (req) => {
+    if (!brandPreview) return brand;
+    let sel = {};
+    try { sel = JSON.parse(parseCookies(req.headers.cookie).nb_preview || '{}'); } catch { /* ignore a bad cookie */ }
+    let b = typeof sel.brand === 'string' && listBrands().includes(sel.brand) ? loadBrand(sel.brand) : loadBrand(brand.id);
+    if (LAYOUTS.includes(sel.layout)) b = { ...b, layout: sel.layout };
+    return b;
+  };
+  const withBrand = (handler) => (req, res) => {
+    try { handler(brandPreview ? brandFor(req) : brand, req, res); } catch (e) { res.status(500).json({ error: e.message }); }
+  };
+  const staticCss = brandPreview ? null : brandCss(brand);
+  const staticFavicon = brandPreview ? null : faviconSvg(brand);
+  const staticInfo = brandPreview ? null : publicBrand(brand);
+  const staticNotice = brandPreview ? null : notice;
   if (process.env.TRUST_PROXY) app.set('trust proxy', process.env.TRUST_PROXY);
   app.use(express.json({ limit: '64kb' }));
 
@@ -78,6 +103,20 @@ export function createApp({
   const publicView = (r) => ({ reference: r.id, name: r.name, answers: r.answers, recommendation: r.recommendation });
 
   app.get('/api/health', (_req, res) => res.json({ ok: true }));
+  app.get('/api/brand', withBrand((b, req, res) => {
+    res.set('Cache-Control', 'no-store');
+    const info = staticInfo || {
+      ...publicBrand(b),
+      preview: { brands: listBrands().map((id) => ({ id, name: loadBrand(id).name })), layouts: LAYOUTS, configured: brand.id, configuredLayout: loadBrand(brand.id).layout },
+    };
+    res.json(info);
+  }));
+  app.get('/api/notice', withBrand((b, _req, res) => {
+    const n = staticNotice || renderNotice(b);
+    res.set('Cache-Control', 'no-store').json({ markdown: n.markdown, draft: n.draft });
+  }));
+  app.get('/brand.css', withBrand((b, _req, res) => { res.type('text/css').set('Cache-Control', 'no-store').send(staticCss || brandCss(b)); }));
+  app.get('/favicon.svg', withBrand((b, _req, res) => { res.type('image/svg+xml').set('Cache-Control', 'no-store').send(staticFavicon || faviconSvg(b)); }));
   // Readiness: can we reach the database? Used by the platform's health check.
   app.get('/api/ready', (_req, res) => {
     try { return res.json({ ok: store.ping() }); } catch { return res.status(503).json({ ok: false }); }

@@ -13,6 +13,7 @@ kill_timeout = 30                  # seconds to finish in-flight work and flush 
 
 [env]
   NODE_ENV = "production"
+  BRAND = "northbound"             # which look and wording this app serves (see brands/)
   PORT = "8080"
   DB_PATH = "/data/platform.db"
   TRUST_PROXY = "1"                # Fly's proxy is one hop in front of the app

@@ -5,6 +5,7 @@ import { createNotifier } from './notifier.js';
 import { createRetention } from './retention.js';
 import { productionProblems, productionWarnings } from './config.js';
 import { authConfigFromEnv } from './auth.js';
+import { loadBrand } from './brand.js';
 
 const problems = productionProblems();
 if (problems.length) {
@@ -19,14 +20,22 @@ try { authConfig = authConfigFromEnv(); } catch (e) {
 }
 for (const w of productionWarnings()) console.warn(`WARNING: ${w}`);
 
+let brand;
+try { brand = loadBrand(process.env.BRAND || 'northbound'); } catch (e) {
+  console.error(e.message);
+  process.exit(1);
+}
+
+if (process.env.BRAND_PREVIEW === 'true') console.log('Design preview is ON: a switcher on the page lets you flip between brands and layouts, and brand files are re-read on every request.');
+
 const store = createStore();
 const mailConfig = mailConfigFromEnv(); // throws with a clear message if SMTP is half-configured
-const notifier = createNotifier({ store, mailer: createMailer(mailConfig), config: mailConfig });
-const app = createApp({ store, notifier, authConfig });
+const notifier = createNotifier({ store, mailer: createMailer(mailConfig), config: { ...mailConfig, brand } });
+const app = createApp({ store, notifier, authConfig, brand });
 const port = Number(process.env.PORT) || 3001;
 
 const server = app.listen(port, () => {
-  console.log(`Northbound onboarding API on http://localhost:${port}`);
+  console.log(`${brand.name} (brand: ${brand.id}) onboarding API on http://localhost:${port}`);
   if (authConfig) console.log(`Admin: staff sign-in via ${authConfig.issuer} (${authConfig.allowedEmails.size} allowed address${authConfig.allowedEmails.size === 1 ? '' : 'es'})`);
   else if (process.env.ADMIN_TOKEN) console.log('Admin: shared ADMIN_TOKEN (set OIDC_* and ADMIN_EMAILS for staff sign-in)');
   else console.log('Admin is DISABLED: no staff sign-in or ADMIN_TOKEN settings were found. Put them in platform/.env (next to package.json) and restart; the npm scripts load that file automatically.');

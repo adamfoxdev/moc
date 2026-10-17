@@ -1,0 +1,30 @@
+{
+  "name": "Brightline Labs",
+  "shortName": "Brightline",
+  "wordmark": ["Bright", "line"],
+  "placeholder": true,
+  "tagline": "Got a big idea? Tell Brightline Labs and get a quick, honest take.",
+  "layout": "banner",
+  "header": "left",
+  "scheme": "light",
+  "fonts": { "body": "rounded", "heading": "rounded" },
+  "shape": { "radius": 22, "controlRadius": 14, "buttons": "pill" },
+  "weight": 800,
+  "tracking": "-0.02em",
+  "maxWidth": 1040,
+  "colors": {
+    "light": { "bg": "#fffaf5", "bg2": "#fff0e3", "card": "#ffffff", "line": "#f0d7c0", "text": "#2a1740", "muted": "#66537c", "accent": "#7c3aed", "accent2": "#b4380a", "err": "#b91c1c", "onAccent": "#ffffff" }
+  },
+  "hero": { "bg": "#6d28d9", "bg2": "#be185d", "fg": "#ffffff" },
+  "copy": {
+    "eyebrow": "Hi there",
+    "headline": "Got a big idea? Let's work out what it needs.",
+    "lead": "Tell us what you're building and we'll send back a quick, honest take on how {shortName} can help. It takes about two minutes.",
+    "points": ["Real people read every note.", "Not sure yet? That's fine. We'll help you shape it.", "No pitch, no pricing, nothing to sign."],
+    "submitLabel": "Show me what's possible",
+    "goalLabel": "What are you dreaming up?",
+    "goalHint": "A sentence or two is plenty. Rough is great.",
+    "goalPlaceholder": "e.g. I built an app with an AI tool and people are loving it, but I'm not sure it's ready for more users.",
+    "finePrint": "No pitch, no pricing, no budget questions. Please don't share passwords, keys or customer data."
+  }
+}

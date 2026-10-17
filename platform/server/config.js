@@ -12,6 +12,9 @@ export function productionProblems(env = process.env) {
   if (!env.PUBLIC_URL || !env.PUBLIC_URL.startsWith('https://')) {
     problems.push('PUBLIC_URL must be set to the https:// address of the site (used in emails and the privacy link).');
   }
+  if (env.BRAND_PREVIEW === 'true') {
+    problems.push('BRAND_PREVIEW=true is a development tool that lets any visitor switch the site\'s design. Remove it in production.');
+  }
   if (env.ADMIN_TOKEN && env.ADMIN_TOKEN.length < 24) {
     problems.push('ADMIN_TOKEN is shorter than 24 characters. Use a long random value, for example: openssl rand -hex 32');
   }

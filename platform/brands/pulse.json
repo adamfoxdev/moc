@@ -1,0 +1,30 @@
+{
+  "name": "Pulse Digital",
+  "shortName": "Pulse",
+  "wordmark": ["Pulse", ".digital"],
+  "placeholder": true,
+  "tagline": "Ship it. Tell Pulse Digital what you've got.",
+  "layout": "split-reverse",
+  "header": "left",
+  "scheme": "dark",
+  "fonts": { "body": "sans", "heading": "mono" },
+  "shape": { "radius": 10, "controlRadius": 6, "buttons": "rounded", "chips": "square" },
+  "weight": 700,
+  "tracking": "-0.03em",
+  "maxWidth": 1120,
+  "colors": {
+    "dark": { "bg": "#08080d", "bg2": "#13131b", "card": "#0f0f17", "line": "#2b2b3c", "text": "#f2f2f7", "muted": "#a3a3b8", "accent": "#c6ff3d", "accent2": "#ff5ce1", "err": "#ff7a7a", "onAccent": "#08080d" }
+  },
+  "hero": { "bg": "#c6ff3d", "bg2": "", "fg": "#08080d" },
+  "copy": {
+    "eyebrow": "// start here",
+    "headline": "Ship it. Tell us what you've got.",
+    "lead": "Drop what you're working on and get an instant read on how {shortName} would move it forward.",
+    "points": ["No sales deck, no gatekeepers.", "We'll say so if you don't need us.", "Free to ask. Zero commitment."],
+    "submitLabel": "Run it",
+    "goalLabel": "What are you building?",
+    "goalHint": "Short is fine. Links are even better.",
+    "goalPlaceholder": "e.g. Vibe-coded the MVP over a weekend. 200 users now, no auth, no tests, and it falls over on Mondays.",
+    "finePrint": "No pitch, no pricing. Don't paste passwords, keys or customer data."
+  }
+}

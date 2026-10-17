@@ -5,5 +5,5 @@ export default defineConfig({
   root: 'web',
   plugins: [react()],
   build: { outDir: '../dist', emptyOutDir: true },
-  server: { port: 5173, proxy: { '/api': 'http://localhost:3001', '/auth': 'http://localhost:3001' } },
+  server: { port: 5173, proxy: { '/api': 'http://localhost:3001', '/auth': 'http://localhost:3001', '/brand.css': 'http://localhost:3001', '/favicon.svg': 'http://localhost:3001' } },
 });

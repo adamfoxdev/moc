@@ -180,6 +180,33 @@ Then:
 
 ---
 
+## 5b. Several brands from one codebase
+
+Five sites with different company names and looks run from the **same image**. Each is its own Fly app, and `BRAND` picks the look (`platform/brands/*.json`, see `platform/README.md`).
+
+| Per brand (separate) | Shared |
+|---|---|
+| Fly app, volume, Tigris bucket, so **data and backups never mix** | The code and the image |
+| `SESSION_SECRET` (new for each app) | Google OAuth client and `ADMIN_EMAILS` (add each site's `/auth/callback` as a redirect URI) |
+| `MAIL_FROM`, `MAIL_REPLY_TO`, `NOTIFY_TO` on the brand's own sending domain | Resend account (verify each brand's domain) |
+| Privacy notice details (`legal` block in the brand file) and the legal entity behind the site | `PRIVACY_NOTICE.md`, the shared wording |
+| Custom domain and certificate | |
+
+**Steps for each extra brand** (the first app is already done):
+
+1. `npm run fly:config -- <brand> <app-name> <https url> <region>` writes `fly.<brand>.toml` (app name, `PUBLIC_URL`, `BRAND`, region). Commit these files so deploys are repeatable.
+2. Create the app, volume and bucket, set secrets, `fly deploy -c fly.<brand>.toml --ha=false` (the commands the script prints). **One machine per app.**
+3. Add `https://<site>/auth/callback` to the Google OAuth client; set `NOTIFY_TO` and `MAIL_FROM` for that brand; verify its email domain.
+4. Fill the brand's `legal` block so its privacy notice loses the draft banner, then redeploy.
+
+**Updating all five:** deploy each app with its own config: `fly deploy -c fly.<brand>.toml --ha=false` from `platform/`. A loop in PowerShell works, but deploy one first and check it before the rest. Do not put several brands on one Fly app: they would share one database.
+
+**Costs and effort scale with the count:** five machines, five volumes, five buckets, five email domains, five privacy notices to keep accurate. Each brand's legal entity is the data controller for its own enquiries: confirm with counsel that this is how you want to structure it, and that the processing terms and notices name the right entity for each site.
+
+**Not tested:** I have not deployed more than the first app, so the `fly deploy -c fly.<brand>.toml` path (that Fly finds the Dockerfile next to a config file with another name) is unconfirmed; if Fly can't find it, add `--dockerfile Dockerfile`. The brand switching itself is tested (69 automated tests, plus real-browser runs of all five brands with the Content-Security-Policy on).
+
+---
+
 ## 6. Configuration
 
 Set in `fly.toml` (not secret) or with `fly secrets set` (secret):
@@ -187,6 +214,7 @@ Set in `fly.toml` (not secret) or with `fly secrets set` (secret):
 | Variable | Where | Notes |
 |---|---|---|
 | `PORT`, `DB_PATH`, `NODE_ENV` | `fly.toml` / image | `8080`, `/data/platform.db`, `production` |
+| `BRAND` | `fly.toml` | Which brand file to serve (default `northbound`) |
 | `PUBLIC_URL` | `fly.toml` | Must be `https://…` in production |
 | `TRUST_PROXY` | `fly.toml` | `1` (Fly's proxy is one hop). **Test after deploy** that a forged `X-Forwarded-For` does not bypass the submission limit |
 | `RETENTION_DAYS` | `fly.toml` | `365`; `0` disables |

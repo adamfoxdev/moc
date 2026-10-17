@@ -27,3 +27,24 @@ export function noticeVersion(path = NOTICE_PATH) {
     return 'unknown';
   }
 }
+
+// Placeholders in the notice that a brand can fill from its "legal" block.
+const TOKENS = {
+  NORTHBOUND_LEGAL_NAME: 'legalName', ENTITY_TYPE: 'entityType', JURISDICTION: 'jurisdiction', REG_NO: 'regNo',
+  ADDRESS: 'address', POSTAL_ADDRESS: 'address', PRIVACY_EMAIL: 'privacyEmail', REGION: 'region',
+  DATE: 'lastUpdated', RETENTION: 'retention', LOG_RETENTION: 'logRetention',
+};
+
+/**
+ * The privacy notice for one brand: the shared text with that brand's name and legal details filled in.
+ * `draft` stays true while any {{placeholder}} is left, and `version` fingerprints exactly this text.
+ */
+export function renderNotice(brand, path = NOTICE_PATH) {
+  let markdown = readFileSync(path, 'utf8');
+  for (const [token, key] of Object.entries(TOKENS)) {
+    const value = brand.legal?.[key];
+    if (value) markdown = markdown.replaceAll(`{{${token}}}`, value);
+  }
+  markdown = markdown.replaceAll('Northbound', brand.name);
+  return { markdown, draft: markdown.includes('{{'), version: createHash('sha256').update(markdown).digest('hex').slice(0, 8) };
+}

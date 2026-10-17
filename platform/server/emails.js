@@ -36,7 +36,8 @@ function layout(bodyHtml) {
 <div style="max-width:600px;margin:0 auto;padding:24px"><div style="background:#fff;border:1px solid #d9dfef;border-radius:12px;padding:24px">${bodyHtml}</div></div></body></html>`;
 }
 
-function confirmation(r, { publicUrl } = {}) {
+function confirmation(r, { publicUrl, brand } = {}) {
+  const company = brand?.name || 'Northbound';
   const privacy = publicUrl ? `${publicUrl.replace(/\/$/, '')}/privacy` : '';
   const first = oneLine(r.name).split(' ')[0] || 'there';
   const { paths, flags } = r.recommendation;
@@ -49,11 +50,11 @@ function confirmation(r, { publicUrl } = {}) {
     ...paths.map((p) => `  - ${p.title}`),
     '',
     ...flags.flatMap((f) => [f, '']),
-    'A person at Northbound will read your request and reply by email within one business day. If it helps, we will suggest a 30-minute call. There is nothing to sign or pay to find out whether we can help.',
+    `A person at ${company} will read your request and reply by email within one business day. If it helps, we will suggest a 30-minute call. There is nothing to sign or pay to find out whether we can help.`,
     '',
     'You can reply to this email to add anything, or to ask for an NDA before you share more. Please do not send passwords, keys or customer data.',
     '',
-    'Northbound',
+    company,
     '',
     "If you didn't make this request, you can ignore this email.",
     privacy ? `We use your details only to reply to this request and keep a record of it. Privacy Notice: ${privacy}` : '',
@@ -64,15 +65,15 @@ function confirmation(r, { publicUrl } = {}) {
 <p>Thanks for telling us what you're working on. Your reference is <strong>${esc(r.id)}</strong>.</p>
 ${paths.length ? `<p>Here's our first read, based on what you've told us so far:</p><ul>${paths.map((p) => `<li>${esc(p.title)}</li>`).join('')}</ul>` : ''}
 ${flags.map((f) => `<p style="border-left:3px solid #2b63d9;padding-left:12px;color:#52608a">${esc(f)}</p>`).join('')}
-<p>A person at Northbound will read your request and reply by email within one business day. If it helps, we'll suggest a 30-minute call. There's nothing to sign or pay to find out whether we can help.</p>
+<p>A person at ${esc(company)} will read your request and reply by email within one business day. If it helps, we'll suggest a 30-minute call. There's nothing to sign or pay to find out whether we can help.</p>
 <p>You can reply to this email to add anything, or to ask for an NDA before you share more. Please don't send passwords, keys or customer data.</p>
-<p>Northbound</p>
+<p>${esc(company)}</p>
 <p style="color:#52608a;font-size:13px">If you didn't make this request, you can ignore this email.${privacy ? ` We use your details only to reply to this request and keep a record of it. <a href="${esc(privacy)}">Privacy Notice</a>.` : ''}</p>`);
 
   return { subject: `We've got your request (${r.id})`, text, html };
 }
 
-function team(r, { isUpdate, publicUrl }) {
+function team(r, { isUpdate, publicUrl, brand }) {
   const who = oneLine(r.name) + (r.company ? ` (${oneLine(r.company, 60)})` : '');
   const rows = summaryRows(r.answers);
   const { paths, flags } = r.recommendation;
@@ -109,16 +110,16 @@ ${link ? `<p><a href="${esc(link)}">Open the inbox</a></p>` : ''}
 <p style="color:#52608a;font-size:13px">Reply to this email to answer them directly.</p>`);
 
   return {
-    subject: `${isUpdate ? 'Updated' : 'New'} request ${r.id}: ${who}`.slice(0, 160),
+    subject: `${brand?.shortName ? `[${brand.shortName}] ` : ''}${isUpdate ? 'Updated' : 'New'} request ${r.id}: ${who}`.slice(0, 160),
     text,
     html,
     replyTo: r.email,
   };
 }
 
-export function renderEmail(kind, request, { publicUrl } = {}) {
-  if (kind === 'confirmation') return confirmation(request, { publicUrl });
-  if (kind === 'team-new') return team(request, { isUpdate: false, publicUrl });
-  if (kind === 'team-update') return team(request, { isUpdate: true, publicUrl });
+export function renderEmail(kind, request, { publicUrl, brand } = {}) {
+  if (kind === 'confirmation') return confirmation(request, { publicUrl, brand });
+  if (kind === 'team-new') return team(request, { isUpdate: false, publicUrl, brand });
+  if (kind === 'team-update') return team(request, { isUpdate: true, publicUrl, brand });
   throw new Error(`Unknown email kind: ${kind}`);
 }

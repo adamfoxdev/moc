@@ -43,6 +43,8 @@ ADMIN_TOKEN=choose-a-long-secret npm start     # everything on http://localhost:
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | port 587 | SMTP server (port 465 uses implicit TLS) |
 | `MAIL_API_KEY` | none | Resend or Postmark API key (`MAIL_TRANSPORT=resend` or `postmark`) |
 | `BUCKET_NAME`, `AWS_*` | none | Backup bucket; set by `fly storage create`. Without `BUCKET_NAME` the container warns that nothing is backed up |
+| `BRAND` | `northbound` | Which brand file in `brands/` this deployment serves |
+| `BRAND_PREVIEW` | `false` | Development design switcher; set by `npm run dev` via `.env.dev`; **refused in production** |
 | `PUBLIC_URL` | none | Base URL for the inbox link in team alerts and the privacy link in confirmations |
 | `RETENTION_DAYS` | `365` | Delete requests inactive this long (`0` = never) |
 | `PORT` | `3001` | API and production server port |
@@ -87,6 +89,55 @@ How it is built:
 - **Sender.** `From` is always `MAIL_FROM`. We never put the customer's address in From.
 
 Setup: copy `.env.example` to `.env` (in this folder, next to `package.json`). `npm run dev`, `npm start` and `npm run check:auth` load it automatically; **restart after changing it**. Variables already set in your shell take priority over the file. By default `MAIL_TRANSPORT=log` prints emails to the console and sends nothing (development only: production refuses to start with it). For real sending set `MAIL_TRANSPORT` to `resend` or `postmark` (HTTPS APIs, which work on Fly.io where outbound SMTP is restricted) with `MAIL_API_KEY` and `MAIL_FROM`, or to `smtp` with `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`. Half-configured settings stop the server at startup with a clear message. Use a sending domain with SPF, DKIM and DMARC set up, or confirmations will land in spam.
+
+## Brands: one codebase, several looks
+
+Each deployment serves one **brand**, chosen by the `BRAND` setting (default `northbound`). A brand is a small file in `brands/<id>.json` that sets the company name, colours, fonts, shapes, page layout and wording. The same image runs every brand, so a fix or feature lands everywhere at once; the data, backups and email of each deployment stay separate.
+
+| Brand file | Look |
+|---|---|
+| `northbound.json` | The original: adaptive light/dark, teal, split layout |
+| `brightline.json` | Light, violet to magenta banner, rounded type, pill buttons |
+| `oakridge.json` | Warm paper, serif headings, centred, formal copy, square corners |
+| `pulse.json` | Dark only, lime and magenta, monospace headings, form on the left |
+| `meridian.json` | Clean corporate blue, compact form-first page |
+
+These are **placeholders**: rename them, or copy one and change it. A brand file only lists what it changes; everything else falls back to the defaults (the Northbound look).
+
+**What a brand controls**
+
+| Setting | Values |
+|---|---|
+| `name`, `shortName`, `wordmark` | Company name; short form used in emails and tags; the logo text (one or two parts, the second in the accent colour; put a trailing space in the first part if you want a gap) |
+| `layout` | `split`, `split-reverse` (form on the left), `centered`, `banner` (colour band with the form overlapping), `minimal` |
+| `header` | `left` or `center` |
+| `scheme` | `auto` (follows the visitor's device), `light` or `dark` |
+| `fonts.body`, `fonts.heading` | `sans`, `humanist`, `geometric`, `rounded`, `serif`, `mono`. System fonts only: nothing is downloaded, so the strict security policy and visitors' privacy are kept |
+| `shape` | `radius` (cards), `controlRadius` (fields, buttons), `buttons` (`rounded` or `pill`), `chips` (`pill` or `square`) |
+| `weight`, `tracking`, `maxWidth` | Heading weight, letter spacing, page width |
+| `colors.light`, `colors.dark` | `bg`, `bg2`, `card`, `line`, `text`, `muted`, `accent`, `accent2` (links), `err`, `onAccent` as `#rrggbb` |
+| `hero` | `bg`, optional `bg2` (gradient) and `fg` for the banner layout |
+| `copy` | `eyebrow`, `headline`, `lead`, `points`, `submitLabel`, `goalLabel`, `goalHint`, `goalPlaceholder`, `finePrint`. `{name}` and `{shortName}` expand to the brand's names |
+| `legal` | `legalName`, `entityType`, `jurisdiction`, `regNo`, `address`, `privacyEmail`, `region`, `lastUpdated`, `retention`, `logRetention`. Fills the placeholders in that brand's privacy notice |
+| `placeholder` | `true` adds "Placeholder name; replace before launch" to the footer. Remove it for a real brand |
+
+Brand files are checked on start-up (unknown fonts, bad colours, text containing `< > { }` are rejected with every problem listed), and a test fails if any brand's text, links, buttons or error colours are hard to read (WCAG contrast).
+
+**Per brand, the server also provides:** the stylesheet (`/brand.css`), the favicon (`/favicon.svg`: the initial on the accent colour), the page title, the confirmation email wording, team alert subjects tagged `[Brightline]`, and a **privacy notice with that brand's name and legal details**. Each brand's consent records carry that brand's notice fingerprint. The notice shows a draft banner until the brand's `legal` block fills every placeholder.
+
+**Review designs live (development only).** `npm run dev` turns on a design switcher (the `.env.dev` file sets `BRAND_PREVIEW=true`). A small panel at the bottom right lets you flip between all brands and all layouts instantly, without a restart or page reload. The choice is kept for your browser. In this mode brand files are re-read on every request, so edit `brands/pulse.json`, save, refresh, and the change appears. The switcher is **off everywhere else**, and production refuses to start with `BRAND_PREVIEW=true`. Preview only changes what you see: submissions and consent records still use the configured brand.
+
+**Running five sites.** One Fly app per brand, each with its own volume, backup bucket and secrets:
+
+```powershell
+npm run fly:config -- pulse moc-pulse https://pulse.example.com ams    # writes fly.pulse.toml
+fly apps create moc-pulse
+fly volumes create northbound_data --app moc-pulse --region ams --size 1
+fly storage create --app moc-pulse
+fly secrets set --app moc-pulse ...        # as for the first app, but see below
+fly deploy -c fly.pulse.toml --ha=false
+```
+Per brand: its own `SESSION_SECRET` (generate a new one each time), `MAIL_FROM` and `NOTIFY_TO` on that brand's own email domain, and its redirect URI (`https://<that site>/auth/callback`) added to Google. You can reuse the same Google OAuth client and `ADMIN_EMAILS` across all of them. See `../FLY_DEPLOYMENT_PLAN.md`, "Several brands".
 
 ## Staff sign-in
 
@@ -163,7 +214,7 @@ See `../FLY_DEPLOYMENT_PLAN.md` for the full plan and first-deploy commands. In 
 
 | File | Purpose |
 |---|---|
-| `Dockerfile` | Build the React app, then a slim Node runtime running as a non-root user |
+| `Dockerfile` | Build the React app, then a slim Node runtime running as a non-root user (includes `brands/`) |
 | `docker-entrypoint.sh` | Fix volume ownership, restore from backup if the volume is empty, run the app under Litestream |
 | `litestream.yml` | Backup replica settings (Tigris, 7-day window) |
 | `fly.toml` | Fly app configuration |

@@ -51,7 +51,7 @@ export function createNotifier({ store, mailer, config, log = console, autoSend 
           const request = store.get(e.requestId);
           if (!request) { store.markEmailFailed(e.id, 'Request no longer exists'); continue; }
           try {
-            const msg = renderEmail(e.kind, request, { publicUrl: config.publicUrl });
+            const msg = renderEmail(e.kind, request, { publicUrl: config.publicUrl, brand: config.brand });
             await mailer.send({ to: e.to, replyTo: msg.replyTo, subject: msg.subject, text: msg.text, html: msg.html });
             store.markEmailSent(e.id, now);
             sent++;

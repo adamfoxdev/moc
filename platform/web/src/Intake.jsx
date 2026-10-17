@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { createRequest } from './api.js';
 import { TextInput, TextArea } from './fields.jsx';
+import { useBrand } from './brand.jsx';
 
 // The front door: the least we need in order to reply.
 export default function Intake({ onCreated }) {
+  const { copy } = useBrand();
   const [v, setV] = useState({ goal: '', name: '', email: '', company: '', consent: false, website: '' });
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
@@ -36,10 +38,10 @@ export default function Intake({ onCreated }) {
   return (
     <form className="card intake" onSubmit={submit} noValidate>
       <TextArea
-        label="What are you working on, or hoping to?"
-        hint="A sentence or two is plenty. Rough is fine."
+        label={copy.goalLabel}
+        hint={copy.goalHint}
         value={v.goal} onChange={set('goal')} error={errors.goal} rows={5}
-        placeholder="e.g. We built a booking tool with Lovable and 40 people use it. We want to make sure it's safe and can grow."
+        placeholder={copy.goalPlaceholder}
       />
       <div className="row">
         <TextInput label="Your name" value={v.name} onChange={set('name')} error={errors.name} autoComplete="name" />
@@ -62,8 +64,8 @@ export default function Intake({ onCreated }) {
       {errors.consent && <p className="error" role="alert">{errors.consent}</p>}
       {fail && <p className="error" role="alert">{fail}</p>}
 
-      <button className="btn" type="submit" disabled={busy}>{busy ? 'Sending…' : 'Show me how you could help'}</button>
-      <p className="fine">No pitch, no pricing and no budget questions. Please don't include passwords, keys or customer data.</p>
+      <button className="btn" type="submit" disabled={busy}>{busy ? 'Sending…' : copy.submitLabel}</button>
+      <p className="fine">{copy.finePrint}</p>
     </form>
   );
 }
