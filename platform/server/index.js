@@ -2,6 +2,7 @@ import { createApp } from './app.js';
 import { createStore } from './db.js';
 import { createMailer, mailConfigFromEnv } from './mail.js';
 import { createNotifier } from './notifier.js';
+import { createRetention } from './retention.js';
 
 const store = createStore();
 const mailConfig = mailConfigFromEnv(); // throws with a clear message if SMTP is half-configured
@@ -17,6 +18,12 @@ const server = app.listen(port, () => {
 });
 notifier.start();
 
+// Requests with no activity for this many days are deleted (clients and held requests are kept). 0 = never.
+const retentionDays = process.env.RETENTION_DAYS === undefined ? 365 : Number(process.env.RETENTION_DAYS);
+if (!Number.isInteger(retentionDays) || retentionDays < 0) throw new Error('RETENTION_DAYS must be a whole number of days (0 to disable)');
+const retention = createRetention({ store, days: retentionDays });
+retention.start();
+
 for (const sig of ['SIGINT', 'SIGTERM']) {
-  process.on(sig, () => { notifier.stop(); server.close(() => { store.close(); process.exit(0); }); });
+  process.on(sig, () => { notifier.stop(); retention.stop(); server.close(() => { store.close(); process.exit(0); }); });
 }

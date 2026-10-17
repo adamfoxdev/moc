@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { saveDetails } from './api.js';
+import { saveDetails, downloadMine, deleteMine } from './api.js';
 import { TextInput, TextArea, Select } from './fields.jsx';
 import { Choice } from './fields.jsx';
 import { STAGE, BUILT_WITH, TEAM, HELP_WITH, USERS, DATA, TIMING, CONTACT } from './options.js';
@@ -93,7 +93,46 @@ function Sharpen({ state, onUpdated }) {
   );
 }
 
-export default function Result({ state, onUpdated, onReset }) {
+function YourData({ state, onDeleted }) {
+  const [confirming, setConfirming] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState('');
+
+  async function run(fn, after) {
+    setBusy(true); setMsg('');
+    try { await fn(); after?.(); } catch (e) { setMsg(e.message); } finally { setBusy(false); }
+  }
+
+  return (
+    <section className="yourdata">
+      <h2>Your data</h2>
+      <p className="muted">
+        You can download everything we hold about this request, or delete it, whenever you like.
+        See our <a href="/privacy" target="_blank" rel="noopener">Privacy Notice</a>.
+      </p>
+      <div className="actions">
+        <button type="button" className="btn ghost" disabled={busy} onClick={() => run(() => downloadMine(state.reference, state.editToken))}>
+          Download my data
+        </button>
+        {!confirming && (
+          <button type="button" className="btn ghost danger" disabled={busy} onClick={() => setConfirming(true)}>Delete my request</button>
+        )}
+      </div>
+      {confirming && (
+        <div className="note" role="alertdialog" aria-label="Confirm deletion">
+          <p><strong>Delete this request?</strong> We'll remove it from our system for good. It can't be undone. Emails already sent remain in mailboxes.</p>
+          <div className="actions">
+            <button type="button" className="btn danger" disabled={busy} onClick={() => run(() => deleteMine(state.reference, state.editToken), onDeleted)}>Yes, delete it</button>
+            <button type="button" className="link" onClick={() => setConfirming(false)}>Keep it</button>
+          </div>
+        </div>
+      )}
+      {msg && <p className="error" role="alert">{msg}</p>}
+    </section>
+  );
+}
+
+export default function Result({ state, onUpdated, onReset, onDeleted }) {
   const first = (state.name || '').split(' ')[0];
   const { recommendation } = state;
   return (
@@ -123,6 +162,8 @@ export default function Result({ state, onUpdated, onReset }) {
       </section>
 
       <Sharpen state={state} onUpdated={onUpdated} />
+
+      <YourData state={state} onDeleted={onDeleted} />
 
       <p className="fine">
         Quote your reference if you write to us. <button type="button" className="link" onClick={onReset}>Send another request</button>

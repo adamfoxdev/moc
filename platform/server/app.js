@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { validateAnswers, validateAdminUpdate } from './validate.js';
 import { recommend } from './recommend.js';
 import { STATUSES } from './db.js';
+import { noticeVersion as currentNoticeVersion } from './notice.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const dist = join(here, '..', 'dist');
@@ -16,6 +17,7 @@ const safeEqual = (a, b) => timingSafeEqual(digest(a), digest(b));
 export function createApp({
   store,
   notifier = null,
+  noticeVersion = currentNoticeVersion(),
   adminToken = process.env.ADMIN_TOKEN,
   maxSubmissions = 5,
   windowMs = 15 * 60 * 1000,
@@ -66,7 +68,7 @@ export function createApp({
     const { ok, errors, value } = validateAnswers(req.body, { requireCore: true });
     if (!ok) return res.status(400).json({ errors });
     const recommendation = recommend(value);
-    const { id, editToken } = store.create(value, recommendation);
+    const { id, editToken } = store.create(value, recommendation, { noticeVersion });
     safely(() => notifier?.requestCreated({ id, email: value.email }));
     res.status(201).json({ reference: id, editToken, recommendation });
   });
@@ -95,6 +97,51 @@ export function createApp({
     res.json(publicView(store.get(req.params.id)));
   });
 
+  // A person's own deletion and export, using the secret from their browser session.
+  const owner = (req, res, next) => {
+    const token = req.get('x-edit-token');
+    const stored = store.editTokenFor(req.params.id);
+    if (!stored || !token || !safeEqual(token, stored)) return res.status(403).json({ error: 'Not allowed.' });
+    next();
+  };
+
+  const download = (res, name, data) => {
+    res.set({
+      'Content-Type': 'application/json; charset=utf-8',
+      'Content-Disposition': `attachment; filename="${name}"`,
+      'Cache-Control': 'no-store',
+    });
+    res.send(JSON.stringify(data, null, 2));
+  };
+
+  const ownerExport = (r, emails) => ({
+    reference: r.id,
+    submittedAt: r.createdAt,
+    lastActivityAt: r.updatedAt,
+    name: r.name,
+    email: r.email,
+    company: r.company,
+    request: r.goal,
+    details: Object.fromEntries(Object.entries(r.answers).filter(([k]) => !['name', 'email', 'company', 'goal'].includes(k))),
+    firstReadWeShowedYou: r.recommendation,
+    consent: { givenAt: r.consentAt, privacyNoticeVersion: r.noticeVersion },
+    emailsAboutThisRequest: emails
+      .filter((e) => e.kind === 'confirmation')
+      .map((e) => ({ what: 'Confirmation to you', to: e.to, status: e.status, sentAt: e.sentAt })),
+  });
+
+  app.get('/api/requests/:id/export', owner, (req, res) => {
+    const r = store.get(req.params.id);
+    store.audit('customer', 'export', r.id);
+    download(res, `northbound-request-${r.id}.json`, ownerExport(r, store.emailsFor(r.id)));
+  });
+
+  app.delete('/api/requests/:id', owner, (req, res) => {
+    if (!store.deleteRequest(req.params.id)) return res.status(404).json({ error: 'Not found.' });
+    store.audit('customer', 'delete', req.params.id);
+    res.json({ deleted: true });
+  });
+
   const admin = express.Router();
   admin.use((req, res, next) => {
     if (!adminToken) return res.status(503).json({ error: 'Admin is disabled. Set ADMIN_TOKEN to enable it.' });
@@ -114,6 +161,18 @@ export function createApp({
     safely(() => notifier?.kick?.());
     res.json({ ok: true });
   });
+  admin.get('/requests/:id/export', (req, res) => {
+    const r = store.get(req.params.id);
+    if (!r) return res.status(404).json({ error: 'Not found.' });
+    store.audit('admin', 'export', r.id);
+    download(res, `northbound-request-${r.id}-full.json`, { ...r, emails: store.emailsFor(r.id), audit: store.auditFor(r.id) });
+  });
+  admin.delete('/requests/:id', (req, res) => {
+    if (!store.deleteRequest(req.params.id)) return res.status(404).json({ error: 'Not found.' });
+    store.audit('admin', 'delete', req.params.id);
+    res.json({ deleted: true });
+  });
+  admin.get('/audit', (_req, res) => res.json({ entries: store.auditList() }));
   admin.patch('/requests/:id', (req, res) => {
     const { ok, errors, value } = validateAdminUpdate(req.body, STATUSES);
     if (!ok) return res.status(400).json({ errors });

@@ -12,6 +12,7 @@
 
 # Part A: Public text
 
+<!-- PUBLIC-NOTICE:START -->
 # Privacy Notice
 
 **{{NORTHBOUND_LEGAL_NAME}}** ("**Northbound**", "**we**", "**us**")
@@ -98,13 +99,13 @@ We may also disclose information if the law requires it or to protect rights, sa
 
 | Data | How long | Then |
 |---|---|---|
-| Requests that don't lead to work together | {{12}} months after our last contact | Deleted |
+| Requests that don't lead to work together | {{12}} months after the last activity on your request | Deleted automatically |
 | Requests that lead to a client relationship | The life of the relationship, then as set out in our contract and legal record-keeping requirements | Deleted or archived as required |
 | Records that an email was sent | {{12}} months | Deleted |
 | Server and security logs | {{LOG_RETENTION}} | Deleted automatically |
 | Data you ask us to delete | Without undue delay, subject to any legal duty to keep it | Deleted |
 
-{{Counsel to confirm periods. See Part C: automatic deletion is not yet built.}}
+{{Counsel to confirm periods. The product deletes requests automatically after the configured period of inactivity (default 365 days; clients and requests on legal hold are exempt). Copies of emails already sent sit in mailboxes and follow the mailbox retention rules; confirm and describe those.}}
 
 ## 7. Security
 
@@ -114,7 +115,9 @@ We protect your data with measures suited to the risk, including access limited 
 
 Depending on where you live, you may have the right to: **be informed** (this notice); **access** your data; **correct** it; **delete** it; **restrict** or **object to** our use of it; **take it with you** (portability); and **withdraw consent** at any time, which doesn't affect earlier use. You can also complain to your data protection authority ({{UK: the Information Commissioner's Office, ico.org.uk; EU: your national authority; US states: your state attorney general, as applicable}}).
 
-To use a right, email **{{PRIVACY_EMAIL}}** with your reference number if you have one. We'll reply within {{one month}}. We may need to confirm it's you before we share or change anything.
+**Do it yourself.** On the page you see after sending a request, you can download everything we hold about that request, or delete it, at any time while that browser tab is open. Your reference and a private code are kept only for that browser session, so if you've closed the tab, email us instead.
+
+Otherwise, email **{{PRIVACY_EMAIL}}** with your reference number if you have one. We'll reply within {{one month}}. We may need to confirm it's you before we share or change anything.
 
 {{Counsel: add US state-law wording (rights to know, delete, correct, opt out of sale/sharing, non-discrimination) and any other regional notices needed. We do not sell or share personal data for advertising.}}
 
@@ -130,6 +133,8 @@ We'll update this notice when what we do changes, and change the date at the top
 
 {{PRIVACY_EMAIL}} · {{POSTAL_ADDRESS}}
 
+<!-- PUBLIC-NOTICE:END -->
+
 ---
 
 ## Short notice for the consent checkbox
@@ -144,13 +149,15 @@ We'll update this notice when what we do changes, and change the date at the top
 
 ## B1. Data map (as the code works today)
 
+Also stored: `consent_at` and `notice_version` (when consent was given and which version of the public notice, identified by a short fingerprint, was shown); an `audit` table recording deletions and exports by reference and action only (no names, emails or content); and a `hold` flag that exempts a request from automatic deletion.
+
 | Data | Where stored | Who can access | Retention in code today |
 |---|---|---|---|
-| `name`, `email`, `company`, `goal`, all optional answers (stage, builtWith, team, helpWith, users, data, timing, timingNote, industry, role, stack, link, outcome, notes, contactPref, wantsNda), `consent` flag | `requests.answers_json` and the `name`/`email`/`company`/`goal` columns, in the SQLite file | Staff with the admin token; anyone with server or database access | **Kept indefinitely** |
-| Recommendation shown (path titles, reasons, flags) | `requests.recommendation_json` | As above | Indefinite |
-| Reference ID, timestamps, status, staff notes | `requests` | As above | Indefinite |
-| Edit token (random secret that lets the submitter change their own request) | `requests.edit_token`, plain text; and the browser's session storage | Database access; the submitter's own browser | Indefinite (should be deleted or rotated at some point) |
-| Email queue records: recipient address, kind, status, attempt count, error text, timestamps | `outbox` | Admin screen (per request); database access | Indefinite |
+| `name`, `email`, `company`, `goal`, all optional answers (stage, builtWith, team, helpWith, users, data, timing, timingNote, industry, role, stack, link, outcome, notes, contactPref, wantsNda), `consent` flag | `requests.answers_json` and the `name`/`email`/`company`/`goal` columns, in the SQLite file | Staff with the admin token; anyone with server or database access | Deleted after the retention period of no activity (default 365 days), unless the request is a client (`working`) or on hold |
+| Recommendation shown (path titles, reasons, flags) | `requests.recommendation_json` | As above | As above |
+| Reference ID, timestamps, status, staff notes | `requests` | As above | As above |
+| Edit token (random secret that lets the submitter change their own request) | `requests.edit_token`, plain text; and the browser's session storage | Database access; the submitter's own browser | Deleted with the request; otherwise does not expire (Part C item 5) |
+| Email queue records: recipient address, kind, status, attempt count, error text, timestamps | `outbox` | Admin screen (per request); database access | Deleted with the request |
 | Email content | Not stored. Rendered at send time; transits the SMTP provider and arrives in team and customer mailboxes | Mail provider; recipients | Governed by the mail provider and mailbox retention |
 | Client IP address | In-memory rate limiter only (up to 15 minutes); not written to the database | Process memory | Auto-expires; but hosting/proxy logs may record it |
 | Admin token | In admin's `sessionStorage` while the tab is open | The admin's browser | Closed with the tab |
@@ -188,19 +195,21 @@ Not present, so the notice says so: no analytics, advertising cookies, third-par
 
 # Part C: Product changes needed (engineering)
 
-Honest list of gaps between what the notice promises and what the code does today.
+Gaps between what the notice promises and what the code does. Items 1 to 4 are built; the rest are open.
 
 | # | Gap | Why it matters | Suggested fix |
 |---|---|---|---|
-| 1 | **No automatic deletion.** Requests, queue records and tokens are kept indefinitely | The notice states retention periods | Scheduled job deleting requests (and their `outbox` rows) older than the retention period unless marked as a client or on hold |
-| 2 | **No way to delete or export one person's data** | Needed to honour deletion and access requests | Admin actions: "Export" (JSON) and "Delete request" (removes the request and its outbox rows), with an audit entry that keeps no personal data |
-| 3 | **No link to the notice from the form, emails or site** | Transparency at the point of collection | Add the short notice next to the consent checkbox; add a footer link on `platform/` pages, in both emails and on `index.html` |
-| 4 | **Consent isn't recorded with text and time** (only a `true` flag, plus the request timestamp) | Evidence of what was agreed | Store the notice version shown and the timestamp with the request |
+| 1 | **Automatic deletion** (DONE) | The notice states retention periods | `RETENTION_DAYS` (default 365; 0 disables). A daily job deletes requests with no activity for that long, with their email records. Clients (`working`) and requests on hold are exempt. Each deletion is audited by reference. |
+| 2 | **Deleting and exporting one person's data** (DONE) | Needed to honour deletion and access requests | People can download or delete their own request from the result page. Staff can export (full JSON, including notes), delete, and place a request on hold from the admin screen. **For counsel:** the self-service export omits internal status and staff notes; decide whether notes must be included in an access request. |
+| 3 | **Links to the notice** (DONE) | Transparency at the point of collection | `/privacy` page (rendered from Part A, with a draft banner while placeholders remain); link beside the consent checkbox, in every page footer, in the confirmation email and in the marketing site footer. |
+| 4 | **Consent record** (DONE) | Evidence of what was agreed | The time consent was given and a fingerprint of the notice version shown are stored with each request. The consent wording itself is not versioned separately. |
 | 5 | **Edit token never expires** | Long-lived bearer secret for personal data | Expire after, for example, 30 days; consider hashing it in the database |
 | 6 | **`MAIL_TRANSPORT=log` prints personal data to console** | Fine for development, risky in a hosted environment | Fail startup in production if the transport is `log`, or redact the body in log mode |
 | 7 | **Encryption at rest and backups undecided** (local SQLite file) | Notice section 7 can't claim it yet | Decide when moving to Azure SQL or similar; update section 7 |
 | 8 | **Single shared admin token, no access log** | Weak accountability for who viewed personal data | Entra ID sign-in for staff, with an audit log of views and changes |
 | 9 | **Hosting and proxy logs not configured** | Notice says logs are kept for a set period | Set retention on the hosting platform and mask IPs if possible |
 | 10 | **Cookie/storage statement** | Must stay true | Re-check whenever anyone adds analytics, fonts, embeds or chat widgets |
+| 11 | **Copies in mailboxes** | Deleting a request does not delete emails already sent. The team alert lands in the `NOTIFY_TO` mailbox and the confirmation in the customer's | Set a retention rule on the team mailbox (or use a shared mailbox with auto-delete) and say so in the notice; the delete screen already tells people about this |
+| 12 | **Backups** | Deleted data may persist in database backups until they expire | Decide backup retention when hosting is chosen, and state it in section 6 |
 
-*Gaps 1 to 3 should be fixed before the platform is promoted publicly. I can implement them when you're ready.*
+*Before promoting the platform publicly, also settle items 6, 11 and 12, and have counsel finalise Part A so the draft banner can come off.*

@@ -9,8 +9,10 @@ const writeToken = (t) => { try { t ? sessionStorage.setItem(TOKEN_KEY, t) : ses
 const EMAIL_KIND = { confirmation: 'Confirmation to customer', 'team-new': 'Alert to team', 'team-update': 'Update alert to team' };
 const when = (iso) => new Date(iso).toLocaleString();
 
-function Detail({ r, statuses, token, onSaved }) {
+function Detail({ r, statuses, token, onSaved, onDeleted }) {
   const [status, setStatus] = useState(r.status);
+  const [hold, setHold] = useState(r.hold);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [notes, setNotes] = useState(r.notes);
   const [msg, setMsg] = useState('');
   const [emails, setEmails] = useState(null);
@@ -19,15 +21,22 @@ function Detail({ r, statuses, token, onSaved }) {
   }, [token, r.id]);
   useEffect(() => { setEmails(null); loadEmails(); }, [loadEmails]);
 
+  async function doDelete() {
+    try { await admin.remove(token, r.id); onDeleted(r.id); } catch (e) { setMsg(e.message); }
+  }
+  async function doExport() {
+    try { await admin.export(token, r.id); } catch (e) { setMsg(e.message); }
+  }
+
   async function retry(id) {
     try { await admin.retryEmail(token, id); setTimeout(loadEmails, 1500); setMsg('Retrying…'); }
     catch (e) { setMsg(e.message); }
   }
   // Reset the form only when a different request is opened, not after our own save.
-  useEffect(() => { setStatus(r.status); setNotes(r.notes); setMsg(''); }, [r.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setStatus(r.status); setNotes(r.notes); setHold(r.hold); setConfirmDelete(false); setMsg(''); }, [r.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function save() {
-    try { onSaved(await admin.update(token, r.id, { status, notes })); setMsg('Saved.'); }
+    try { onSaved(await admin.update(token, r.id, { status, notes, hold })); setMsg('Saved.'); }
     catch (e) { setMsg(e.message); }
   }
   const a = r.answers;
@@ -43,6 +52,7 @@ function Detail({ r, statuses, token, onSaved }) {
     <section className="card detail">
       <h2>{r.name} <span className="muted">{r.company}</span></h2>
       <p><a href={`mailto:${r.email}?subject=${encodeURIComponent('Your request ' + r.id)}`}>{r.email}</a> · {r.id} · received {when(r.createdAt)}</p>
+      <p className="muted small">Consent given {r.consentAt ? when(r.consentAt) : 'unknown'}, privacy notice version {r.noticeVersion || 'unknown'}.</p>
       <h3>Their words</h3>
       <p className="quote">{r.goal}</p>
       <dl>{rows.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
@@ -77,7 +87,25 @@ function Detail({ r, statuses, token, onSaved }) {
       <label className="field">Notes
         <textarea rows={4} value={notes} onChange={(e) => setNotes(e.target.value)} />
       </label>
+      <label className="check">
+        <input type="checkbox" checked={hold} onChange={(e) => setHold(e.target.checked)} />
+        <span>Keep this request (exempt from automatic deletion). Requests set to “Working together” are kept too.</span>
+      </label>
       <div className="actions"><button className="btn" onClick={save}>Save</button> <span role="status" className="saved">{msg}</span></div>
+      <h3>Their data</h3>
+      <div className="actions">
+        <button className="btn ghost" onClick={doExport}>Export (JSON)</button>
+        {!confirmDelete && <button className="btn ghost danger" onClick={() => setConfirmDelete(true)}>Delete request</button>}
+      </div>
+      {confirmDelete && (
+        <div className="note" role="alertdialog" aria-label="Confirm deletion">
+          <p><strong>Delete {r.id} permanently?</strong> The request and its email records are removed and this can't be undone. The deletion is logged by reference only. Alert emails already in the team mailbox are not touched.</p>
+          <div className="actions">
+            <button className="btn danger" onClick={doDelete}>Yes, delete</button>
+            <button className="link" onClick={() => setConfirmDelete(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
@@ -110,6 +138,7 @@ export default function Admin() {
   if (!data) return <p className="muted">{error || 'Loading…'}</p>;
 
   const current = data.requests.find((r) => r.id === selected);
+  const removed = (id) => { setSelected(null); setData((d) => ({ ...d, requests: d.requests.filter((r) => r.id !== id) })); };
   const merge = (u) => setData((d) => ({ ...d, requests: d.requests.map((r) => (r.id === u.id ? u : r)) }));
 
   return (
@@ -132,7 +161,7 @@ export default function Admin() {
               </li>
             ))}
           </ul>
-          {current ? <Detail r={current} statuses={data.statuses} token={token} onSaved={merge} /> : <p className="muted">Pick a request.</p>}
+          {current ? <Detail r={current} statuses={data.statuses} token={token} onSaved={merge} onDeleted={removed} /> : <p className="muted">Pick a request.</p>}
         </div>
       )}
     </div>

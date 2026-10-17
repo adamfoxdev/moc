@@ -228,7 +228,7 @@ footer{padding:48px 0;border-top:1px solid var(--line);color:var(--muted);font-s
 </main>
 
 <footer>
-  <div class="wrap">© <span id="y"></span> Northbound Consulting. Placeholder name and contact details — replace before launch.</div>
+  <div class="wrap">© <span id="y"></span> Northbound Consulting. Placeholder name and contact details — replace before launch. · <a data-privacy href="mailto:hello@example.com?subject=Privacy">Privacy Notice</a></div>
 </footer>
 <script>
 document.getElementById('y').textContent=new Date().getFullYear();
@@ -237,6 +237,7 @@ document.getElementById('y').textContent=new Date().getFullYear();
   var m=document.querySelector('meta[name="onboarding-url"]'),u=m&&m.content.trim();
   if(!u)return;
   document.querySelectorAll('[data-onboard]').forEach(function(a){a.href=u});
+  document.querySelectorAll('[data-privacy]').forEach(function(a){a.href=u.replace(/\/?$/,'/')+'privacy'});
 })();
 </script>
 </body>

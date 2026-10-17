@@ -97,5 +97,9 @@ export function validateAdminUpdate(body, statuses) {
     if (typeof b.notes !== 'string' || b.notes.length > 10000) errors.notes = 'Notes must be text under 10,000 characters.';
     else value.notes = b.notes;
   }
+  if (b.hold !== undefined) {
+    if (typeof b.hold !== 'boolean') errors.hold = 'Hold must be true or false.';
+    else value.hold = b.hold;
+  }
   return { errors, value, ok: Object.keys(errors).length === 0 };
 }

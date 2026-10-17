@@ -19,7 +19,31 @@ export const getRequest = (id, token) => request(`/api/requests/${id}`, { header
 export const saveDetails = (id, token, body) =>
   request(`/api/requests/${id}/details`, { method: 'PUT', body, headers: { 'x-edit-token': token } });
 
+async function download(path, headers, fallbackName) {
+  const res = await fetch(path, { headers });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    const err = new Error(data.error || 'Something went wrong. Please try again.');
+    err.status = res.status;
+    throw err;
+  }
+  const name = /filename="([^"]+)"/.exec(res.headers.get('content-disposition') || '')?.[1] || fallbackName;
+  const url = URL.createObjectURL(await res.blob());
+  const a = Object.assign(document.createElement('a'), { href: url, download: name });
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+export const downloadMine = (id, token) =>
+  download(`/api/requests/${id}/export`, { 'x-edit-token': token }, `northbound-request-${id}.json`);
+export const deleteMine = (id, token) =>
+  request(`/api/requests/${id}`, { method: 'DELETE', headers: { 'x-edit-token': token } });
+
 export const admin = {
+  export: (token, id) => download(`/api/admin/requests/${id}/export`, { 'x-admin-token': token }, `northbound-request-${id}-full.json`),
+  remove: (token, id) => request(`/api/admin/requests/${id}`, { method: 'DELETE', headers: { 'x-admin-token': token } }),
   list: (token) => request('/api/admin/requests', { headers: { 'x-admin-token': token } }),
   get: (token, id) => request(`/api/admin/requests/${id}`, { headers: { 'x-admin-token': token } }),
   retryEmail: (token, id) => request(`/api/admin/emails/${id}/retry`, { method: 'POST', headers: { 'x-admin-token': token } }),

@@ -54,7 +54,10 @@ export default function Intake({ onCreated }) {
 
       <label className="check">
         <input type="checkbox" checked={v.consent} onChange={(e) => set('consent')(e.target.checked)} />
-        <span>OK to email me about this request. That's all we'll use it for.</span>
+        <span>
+          OK to email me about this request. We use your details only to reply and keep a record of it.{' '}
+          <a href="/privacy" target="_blank" rel="noopener">Privacy Notice</a>
+        </span>
       </label>
       {errors.consent && <p className="error" role="alert">{errors.consent}</p>}
       {fail && <p className="error" role="alert">{fail}</p>}

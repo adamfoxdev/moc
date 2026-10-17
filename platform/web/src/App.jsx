@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Intake from './Intake.jsx';
 import Result from './Result.jsx';
 import Admin from './Admin.jsx';
+import Privacy from './Privacy.jsx';
 import { getRequest, session } from './api.js';
 
 function Shell({ children }) {
@@ -13,13 +14,16 @@ function Shell({ children }) {
         </div>
       </header>
       <main className="wrap">{children}</main>
-      <footer className="wrap fine">Northbound Consulting. Placeholder name; replace before launch.</footer>
+      <footer className="wrap fine">
+        Northbound Consulting. Placeholder name; replace before launch. · <a href="/privacy">Privacy Notice</a>
+      </footer>
     </>
   );
 }
 
 function Customer() {
   const [state, setState] = useState(null);
+  const [deleted, setDeleted] = useState(false);
   const [restoring, setRestoring] = useState(() => !!session.load());
 
   // Come back to the same page after a refresh.
@@ -36,10 +40,20 @@ function Customer() {
     setState(s);
     session.save({ reference: s.reference, editToken: s.editToken });
   };
-  const reset = () => { session.clear(); setState(null); };
+  const reset = () => { session.clear(); setState(null); setDeleted(false); };
+  const afterDelete = () => { session.clear(); setState(null); setDeleted(true); };
 
   if (restoring) return <p className="muted">One moment…</p>;
-  if (state) return <Result state={state} onUpdated={update} onReset={reset} />;
+  if (state) return <Result state={state} onUpdated={update} onReset={reset} onDeleted={afterDelete} />;
+  if (deleted) {
+    return (
+      <div className="card narrow" role="status">
+        <h1>Deleted</h1>
+        <p>We've deleted your request from our system. Emails we already sent you stay in your inbox, and copies in our own mailbox are removed under our email retention rules.</p>
+        <p><button className="link" onClick={reset}>Send a new request</button></p>
+      </div>
+    );
+  }
 
   return (
     <div className="hero">
@@ -62,6 +76,6 @@ function Customer() {
 }
 
 export default function App() {
-  const isAdmin = window.location.pathname.replace(/\/$/, '') === '/admin';
-  return <Shell>{isAdmin ? <Admin /> : <Customer />}</Shell>;
+  const path = window.location.pathname.replace(/\/$/, '');
+  return <Shell>{path === '/admin' ? <Admin /> : path === '/privacy' ? <Privacy /> : <Customer />}</Shell>;
 }

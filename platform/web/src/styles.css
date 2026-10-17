@@ -93,3 +93,12 @@ footer.fine { padding-bottom: 32px; }
 .pill { display:inline-block; font-size:12px; border-radius:99px; padding:0 8px; border:1px solid var(--line); }
 .pill.sent { color:var(--accent); border-color:var(--accent); }
 .pill.failed { color:var(--err); border-color:var(--err); }
+
+.btn.ghost { background:transparent; color:var(--text); border:1px solid var(--line); }
+.btn.danger, .btn.ghost.danger { color:var(--err); border-color:var(--err); }
+.btn.danger:not(.ghost) { background:var(--err); color:var(--bg); border-color:var(--err); }
+.yourdata { margin-top: 36px; }
+.privacy { max-width: 760px; }
+.privacy h1 { font-size: 32px; }
+.privacy table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 12px 0; display: block; overflow-x: auto; }
+.privacy th, .privacy td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }

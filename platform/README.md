@@ -37,7 +37,8 @@ ADMIN_TOKEN=choose-a-long-secret npm start     # everything on http://localhost:
 | `MAIL_TRANSPORT` | `log` | `log` (print only) or `smtp` |
 | `MAIL_FROM`, `MAIL_REPLY_TO` | placeholder, `MAIL_FROM` | Sender, and where customer replies go |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | port 587 | SMTP server (port 465 uses implicit TLS) |
-| `PUBLIC_URL` | none | Base URL used for the inbox link in team alerts |
+| `PUBLIC_URL` | none | Base URL for the inbox link in team alerts and the privacy link in confirmations |
+| `RETENTION_DAYS` | `365` | Delete requests inactive this long (`0` = never) |
 | `PORT` | `3001` | API and production server port |
 | `DB_PATH` | `data/platform.db` | SQLite file (git-ignored) |
 | `TRUST_PROXY` | unset | Set (for example `1`) behind a proxy so rate limiting sees real client IPs |
@@ -54,6 +55,9 @@ ADMIN_TOKEN=choose-a-long-secret npm start     # everything on http://localhost:
 | Rules that pick the routes | `server/recommend.js` |
 | Storage (the only file that touches SQL) | `server/db.js` |
 | Email queue, retries, worker | `server/notifier.js` |
+| Retention job | `server/retention.js` |
+| Notice version and extraction | `server/notice.js`, `scripts/sync-privacy.mjs` |
+| Public privacy page | `web/src/Privacy.jsx` |
 | Email wording | `server/emails.js` |
 | SMTP / log transport and settings | `server/mail.js` |
 
@@ -78,6 +82,16 @@ How it is built:
 
 Setup: copy `.env.example` to `.env`, then `node --env-file=.env server/index.js`. By default `MAIL_TRANSPORT=log` prints emails to the console and sends nothing. For real sending, set `MAIL_TRANSPORT=smtp` with `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` and `MAIL_FROM` (Microsoft 365 or Azure Communication Services Email both work over SMTP). Half-configured SMTP stops the server at startup with a clear message. Use a sending domain with SPF, DKIM and DMARC set up, or confirmations will land in spam.
 
+## Privacy: retention, export, deletion, notice
+
+- **Automatic deletion.** A daily job deletes requests with no activity for `RETENTION_DAYS` (default 365; `0` turns it off), together with their email records. Requests with status **Working together** (clients) and requests marked **Keep** in `/admin` are exempt. Activity means the customer adding detail or staff saving a change.
+- **People can manage their own data.** The page shown after sending a request has **Download my data** (a JSON file) and **Delete my request** (two steps). Both use the secret code held in that browser session, so they only work while the tab is open; otherwise people email us. The self-service export leaves out staff status and notes (counsel to decide, see `../PRIVACY_NOTICE.md` Part C item 2).
+- **Staff tools** in `/admin`: full export (includes notes, email records and the audit trail), delete, and keep. `GET /api/admin/audit` lists the audit log.
+- **Audit log.** Deletions (by customer, staff or the retention job) and exports are recorded by reference and action only, never names, emails or content.
+- **Privacy notice.** `/privacy` renders the public part of `../PRIVACY_NOTICE.md`. After editing that file run `npm run sync:privacy` (`npm run build` does it too); a test fails if the page copy drifts. While the text still contains `{{placeholders}}` the page shows a draft banner. The notice is linked from the consent checkbox, every page footer, the confirmation email and the marketing site footer.
+- **Consent evidence.** Each request stores when consent was given and a fingerprint of the notice version shown.
+- **Not covered by deletion:** emails already sent stay in mailboxes (set a retention rule on the team mailbox), and database backups until they expire. The delete screens say so.
+
 ## Protections in place
 
 - Server-side validation of every field; unknown fields dropped; 64 KB body limit.
@@ -93,6 +107,6 @@ Setup: copy `.env.example` to `.env`, then `node --env-file=.env server/index.js
 - **Single admin token**, not named users. Next step: Entra ID sign-in for staff.
 - **Rate limiting is per process.** Use a shared store or gateway limit if you run more than one instance.
 - **Local SQLite file.** Fine for one instance; for production use Azure SQL by replacing `server/db.js`, and encrypt and back up the data. It holds personal data, so see `DPA.md` and your privacy notice.
-- **Privacy notice is a draft for counsel** (`../PRIVACY_NOTICE.md`) and is not linked from the form yet. It lists product gaps to fix first: automatic deletion, per-person export and delete, and edit-token expiry (Part C).
+- **The privacy notice is still a draft for counsel** (`../PRIVACY_NOTICE.md`). It is linked everywhere, but shows a draft banner until the placeholders are filled in. Open items in its Part C: edit-token expiry, console logging of emails in `log` mode, mailbox and backup retention, admin sign-in and hosting logs.
 - **Node's `node:sqlite` is still marked experimental.** It is wrapped in `server/db.js`, so swapping to `better-sqlite3` or Azure SQL touches one file.
 - Placeholder name "Northbound", no real branding.

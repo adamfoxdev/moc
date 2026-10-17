@@ -17,7 +17,7 @@ async function start({ mailer, cfg = config } = {}) {
   const quiet = { log() {}, warn() {}, error() {} };
   const notifier = createNotifier({ store, mailer: m, config: cfg, log: quiet, autoSend: false });
   const app = createApp({ store, notifier, serveStatic: false, adminToken: 'secret', maxSubmissions: 100 });
-  const server = await new Promise((r) => { const s = app.listen(0, () => r(s)); });
+  const server = await new Promise((r) => { const s = app.listen(0, () => { s.unref(); r(s); }); });
   const base = `http://127.0.0.1:${server.address().port}`;
   const call = (path, init = {}) => fetch(base + path, {
     ...init, headers: { 'content-type': 'application/json', ...(init.headers || {}) }, body: init.body && JSON.stringify(init.body),

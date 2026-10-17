@@ -36,7 +36,8 @@ function layout(bodyHtml) {
 <div style="max-width:600px;margin:0 auto;padding:24px"><div style="background:#fff;border:1px solid #d9dfef;border-radius:12px;padding:24px">${bodyHtml}</div></div></body></html>`;
 }
 
-function confirmation(r) {
+function confirmation(r, { publicUrl } = {}) {
+  const privacy = publicUrl ? `${publicUrl.replace(/\/$/, '')}/privacy` : '';
   const first = oneLine(r.name).split(' ')[0] || 'there';
   const { paths, flags } = r.recommendation;
   const text = [
@@ -55,6 +56,7 @@ function confirmation(r) {
     'Northbound',
     '',
     "If you didn't make this request, you can ignore this email.",
+    privacy ? `We use your details only to reply to this request and keep a record of it. Privacy Notice: ${privacy}` : '',
   ].filter((l, i, a) => !(l === '' && a[i - 1] === '')).join('\n');
 
   const html = layout(`
@@ -65,7 +67,7 @@ ${flags.map((f) => `<p style="border-left:3px solid #2b63d9;padding-left:12px;co
 <p>A person at Northbound will read your request and reply by email within one business day. If it helps, we'll suggest a 30-minute call. There's nothing to sign or pay to find out whether we can help.</p>
 <p>You can reply to this email to add anything, or to ask for an NDA before you share more. Please don't send passwords, keys or customer data.</p>
 <p>Northbound</p>
-<p style="color:#52608a;font-size:13px">If you didn't make this request, you can ignore this email.</p>`);
+<p style="color:#52608a;font-size:13px">If you didn't make this request, you can ignore this email.${privacy ? ` We use your details only to reply to this request and keep a record of it. <a href="${esc(privacy)}">Privacy Notice</a>.` : ''}</p>`);
 
   return { subject: `We've got your request (${r.id})`, text, html };
 }
@@ -115,7 +117,7 @@ ${link ? `<p><a href="${esc(link)}">Open the inbox</a></p>` : ''}
 }
 
 export function renderEmail(kind, request, { publicUrl } = {}) {
-  if (kind === 'confirmation') return confirmation(request);
+  if (kind === 'confirmation') return confirmation(request, { publicUrl });
   if (kind === 'team-new') return team(request, { isUpdate: false, publicUrl });
   if (kind === 'team-update') return team(request, { isUpdate: true, publicUrl });
   throw new Error(`Unknown email kind: ${kind}`);

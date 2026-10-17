@@ -10,7 +10,7 @@ const minimal = { goal: 'We built a scheduling tool with Lovable and need it liv
 async function start(opts = {}) {
   const store = createStore(':memory:');
   const app = createApp({ store, serveStatic: false, adminToken: 'secret', ...opts });
-  const server = await new Promise((r) => { const s = app.listen(0, () => r(s)); });
+  const server = await new Promise((r) => { const s = app.listen(0, () => { s.unref(); r(s); }); });
   const base = `http://127.0.0.1:${server.address().port}`;
   const call = (path, init = {}) => fetch(base + path, {
     ...init,
